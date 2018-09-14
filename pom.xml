@@ -1,0 +1,213 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.yunkouan</groupId>
+	<artifactId>wms</artifactId>
+	<version>V1.0</version>
+	<packaging>war</packaging>
+	<name>wms Maven Webapp</name>
+	<description>WMS System</description>
+
+    <repositories>
+
+        <repository>
+            <id>aliyunmaven</id>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>huaweicloud</id>
+            <url>https://repo.huaweicloud.com/repository/maven/</url>
+        </repository>
+
+    </repositories>
+
+	<!-- 项目属性 -->
+	<properties>
+		<!-- maven插件参数设置 -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<downloadSources>true</downloadSources>
+		<jdk.version>1.8</jdk.version>
+		<spring.version>4.3.4.RELEASE</spring.version>
+		<!-- 依赖 -->
+		<sw.version>1.0</sw.version>
+	</properties>
+
+
+	<!-- 依赖 -->
+	<dependencies>
+
+		<dependency>
+		    <groupId>xstream</groupId>
+		    <artifactId>xstream</artifactId>
+		    <version>1.2.2</version>
+		</dependency>
+
+		<!--
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>dubbo</artifactId>
+			<version>2.5.3</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>spring</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		-->
+		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.20.0-GA</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.apache.zookeeper</groupId>
+		    <artifactId>zookeeper</artifactId>
+		    <version>3.4.9</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.github.sgroschupf</groupId>
+		    <artifactId>zkclient</artifactId>
+		    <version>0.1</version>
+		</dependency>
+
+
+
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.12</version>
+		</dependency>
+
+		<!-- junit test -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.el</artifactId>
+			<version>3.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.el</groupId>
+			<artifactId>el-api</artifactId>
+			<version>2.2</version>
+		</dependency>
+
+
+		<!-- javax.servlet -->
+		<!-- servlet类 begin -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>javax.servlet.jsp-api</artifactId>
+			<version>2.3.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- servlet类 end -->
+		
+		<dependency>
+		    <groupId>jaxen</groupId>
+		    <artifactId>jaxen</artifactId>
+		    <version>1.1.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.yunkouan</groupId>
+			<artifactId>sw_common</artifactId>
+			<version>${sw.version}</version>
+			<!-- <scope>compile</scope> -->
+		</dependency>
+
+		<!-- quartz --> 
+		<dependency>  
+            <groupId>org.quartz-scheduler</groupId>  
+            <artifactId>quartz</artifactId>  
+            <version>2.2.3</version>  
+        </dependency> 
+		<dependency>
+		    <groupId>org.quartz-scheduler</groupId>
+		    <artifactId>quartz-jobs</artifactId>
+		    <version>2.2.3</version>
+		</dependency>
+
+	</dependencies> 
+
+
+	<!-- Eclipse 插件 -->
+
+	<build>
+		<outputDirectory>${project.basedir}/src/main/webapp/WEB-INF/classes/</outputDirectory>
+		<plugins>
+			<!-- Compiler 插件, 设定JDK版本 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.6.0</version>
+				<configuration>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
+					<showWarnings>true</showWarnings>
+					<encoding>UTF-8</encoding>
+					<compilerArguments>
+						<extdirs>${basedir}/src/main/webapp/WEB-INF/lib</extdirs>
+					</compilerArguments>
+				</configuration>
+			</plugin>
+			<!-- eclipse 插件 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<downloadSources>${downloadSources}</downloadSources>
+					<downloadJavadocs>false</downloadJavadocs>
+					<wtpversion>2.0</wtpversion>
+					<jeeversion>5.0</jeeversion>
+					<additionalConfig>
+						<file>
+							<name>.settings/org.eclipse.core.resources.prefs</name>
+							<content>
+								<![CDATA[eclipse.preferences.version=1${line.separator}encoding/<project>=${project.build.sourceEncoding}${line.separator}]]>
+							</content>
+						</file>
+					</additionalConfig>
+					<additionalProjectnatures>
+						<projectnature>org.springframework.ide.eclipse.core.springnature</projectnature>
+					</additionalProjectnatures>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<warSourceExcludes>
+					</warSourceExcludes>
+					<webappDirectory>${project.build.directory}/${project.artifactId}</webappDirectory>
+					<warName>${project.artifactId}</warName>
+				</configuration>
+			</plugin>
+
+		</plugins>
+
+	</build>
+
+
+</project>
