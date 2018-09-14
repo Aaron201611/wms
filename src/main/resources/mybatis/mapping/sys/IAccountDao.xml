@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.sys.dao.IAccountDao">
+	<cache type="com.yunkouan.cache.RedisCache4Mybatis">
+		<property name="eternal" value="true"/>
+	    <property name="maxEntriesLocalHeap" value="1000"/>
+	    <property name="maxEntriesLocalDisk" value="10000000"/>
+	    <property name="memoryStoreEvictionPolicy" value="LRU"/>
+	</cache>
+
+	<select id="query" parameterType="com.yunkouan.wms.modules.sys.vo.AccQueryVo" resultType="com.yunkouan.saas.modules.sys.entity.SysAuth" useCache="false">
+		select distinct ah.*
+		from sys_role r, sys_account_role a, sys_role_auth ra, sys_org_auth oa, sys_auth ah, meta_warehouse h
+		where a.role_id = r.role_id
+		and ra.role_id = a.role_id
+		and oa.org_auth_id = ra.org_auth_id
+		and ah.auth_id = oa.auth_id
+		and h.warehouse_id = a.warehouse_id
+		and ah.auth_status = 20
+		and r.role_status = 20
+		and h.warehouse_status = 20
+		and a.account_id = #{accountId}
+		and a.warehouse_id = #{warehouseId}
+	</select>
+
+	<select id="query4park" parameterType="com.yunkouan.wms.modules.sys.vo.AccQueryVo" resultType="com.yunkouan.saas.modules.sys.entity.SysAuth" useCache="false">
+		select distinct ah.*
+		from sys_role r, sys_account_role a, sys_role_auth ra, sys_org_auth oa, sys_auth ah
+		where a.role_id = r.role_id
+		and ra.role_id = a.role_id
+		and oa.org_auth_id = ra.org_auth_id
+		and ah.auth_id = oa.auth_id
+		and ah.auth_status = 20
+		and r.role_status = 20
+		and a.account_id = #{accountId}
+	</select>
+
+</mapper>

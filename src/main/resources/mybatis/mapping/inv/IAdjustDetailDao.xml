@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.inv.dao.IAdjustDetailDao">
+	<sql id="table_name">
+		inv_adjust_detail
+	</sql>
+	
+	<!-- 后台 - 新增调账单详情 add by 王通 -->
+	<insert id="add" parameterType="InvAdjustDetail">
+		INSERT INTO
+		<include refid="table_name" />
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			adjust_detail_id, adjust_id, sku_id, asn_detail_id, batch_no,
+			location_id, stock_qty, difference_qty, real_qty,
+			adjust_type, org_id, warehouse_id, asn_id,
+			create_person, create_time, update_person,
+			update_time
+	    </trim>
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," > 
+		(
+			#{item.adjustDetailId},#{item.adjustId},#{item.skuId},
+			#{item.asnDetailId},#{item.batchNo},#{item.locationId},
+			#{item.stockQty},#{item.differenceQty},#{item.realQty},
+			#{item.adjustType},#{item.orgId},#{item.warehouseId},
+			#{item.asnId},#{item.createPerson},#{item.createTime},
+			#{item.updatePerson},#{item.updateTime}
+		)
+		</foreach>
+	</insert>
+	
+	
+</mapper>

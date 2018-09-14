@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.rec.dao.IPutawayDetailDao">
+	<!-- <select id="selectInStock" parameterType="InStockVO" resultType="InStockVO">
+		SELECT
+		  t1.location_no,
+		  t2.sku_name,
+		  t2.sku_bar_code,
+		  t3.po_no,
+		  t3.order_date,
+		  t4.plan_putaway_qty,
+		  t4.real_putaway_qty,
+		  t5.merchant_short_name OWNER,
+		  t6.merchant_short_name sender,
+		  t3.contact_phone contact_way,
+		  t3.op_time in_stock_date
+		FROM
+		  meta_location t1,
+		  meta_sku t2,
+		  rec_asn t3,
+		  rec_putaway_detail t4,
+		  meta_merchant t5,
+		  meta_merchant t6,
+		  rec_putaway t7,
+		  rec_putaway_location t8
+		WHERE t7.putaway_status = 40
+		  AND t8.putaway_type = 20
+		  AND t7.`putaway_id` = t4.`putaway_id`
+		  AND t4.`putaway_detail_id` = t8.`putaway_detail_id`
+		  AND t8.location_id = t1.location_id
+		  AND t4.sku_id = t2.sku_id
+		  AND t2.owner = t5.`merchant_id`
+		  AND t7.`asn_no` = t3.`asn_no`
+		  AND t3.sender = t6.merchant_id
+		  <if test="locationNoLike != null and locationNoLike != ''">
+		  	AND t1.location_no LIKE #{locationNoLike}
+		  </if>
+		  <if test="skuNameLike != null and skuNameLike != ''">
+		  	AND t2.sku_name LIKE #{skuNameLike}
+		  </if>
+		  <if test="skuBarCodeLike != null and skuBarCodeLike != ''">
+		  	AND t2.sku_bar_code LIKE #{skuBarCodeLike}
+		  </if>
+		  <if test="poNoLike != null and poNoLike != ''">
+		  	AND t3.po_no LIKE #{poNoLike}
+		  </if>
+		  <if test="orderDateStart != null">
+		  	AND t3.order_date &gt;= #{orderDateStart}
+		  </if>
+		  <if test="orderDateEnd != null">
+		  	AND t3.order_date &lt;= #{orderDateEnd}
+		  </if>
+		  <if test="ownerLike != null and ownerLike != ''">
+		  	AND t5.`merchant_short_name` LIKE #{ownerLike}
+		  </if>
+		ORDER BY t3.create_time DESC
+	</select> -->
+</mapper>

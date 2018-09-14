@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.ts.dao.ITaskDao">
+	<cache type="com.yunkouan.cache.RedisCache4Mybatis">
+		<property name="eternal" value="true"/>
+	    <property name="maxEntriesLocalHeap" value="1000"/>
+	    <property name="maxEntriesLocalDisk" value="10000000"/>
+	    <property name="memoryStoreEvictionPolicy" value="LRU"/>
+	</cache>
+
+	<!-- 查询任务类型的任务数量 -->
+	<select id="countGroupByTaskType"  parameterType="java.util.Map" resultType="java.util.Map" useCache="false">
+		select task_type as taskType,count(*) as num
+		 from ts_task	 
+		 <where>
+		    <if test="orgId !=null">
+		 	 org_id = #{orgId}
+		 	</if>
+		   <if test="warehouseId !=null">
+		   	and warehouse_id = #{warehouseId}
+		   </if>
+		   <if test="opPerson !=null">
+		   	and op_person = #{opPerson}
+		   </if>
+		   <if test="statusList !=null ">
+		    and  task_status in
+				 <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">  
+					 #{item}  
+				 </foreach>
+		   </if>
+		 </where>
+		  group by task_type
+	</select>
+	
+	<!-- 查询所有人任务数 -->
+	<select id="countGroupByOpperson"  parameterType="java.util.Map" resultType="java.util.Map" useCache="false" >
+		select op_person as opPerson,count(*) as num
+		 from ts_task	  
+		 <where>
+		    <if test="orgId !=null and orgId !=''">
+		 	 org_id = #{orgId}
+		 	</if>
+		   <if test="warehouseId !=null and warehouseId !=''">
+		   	and warehouse_id = #{warehouseId}
+		   </if>
+		   <if test="opPerson !=null">
+		   	and task_type = #{taskType}
+		   </if>
+		   <if test="statusList !=null ">
+		    and  task_status in
+				 <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">  
+					 #{item}  
+				 </foreach>
+		   </if>
+		 </where>
+		  group by op_person
+		  order by num;
+	</select>
+</mapper>

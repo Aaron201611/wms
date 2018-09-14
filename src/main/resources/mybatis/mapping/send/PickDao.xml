@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.send.dao.IPickDao">
+	<!-- 查询拣货单列表 -->
+	<select id="qryList"  parameterType="com.yunkouan.wms.modules.send.entity.SendPick" resultType="com.yunkouan.wms.modules.send.entity.SendPick">
+		select * 
+		 from send_pick		 
+		 <where>
+		 	<if test="orgId !=null">
+		   		org_id = #{orgId}
+		   	</if>
+		   	<if test="warehouseId !=null">
+		   		and warehouse_id = #{warehouseId}
+		   	</if>		   
+		   <if test="owner !=null">
+		    and owner = #{owner}
+		   </if>
+		   <if test="deliveryId !=null">
+		    and delivery_id = #{deliveryId}
+		   </if>
+		   <if test="waveId !=null">
+		    and wave_id = #{waveId}
+		   </if>
+		   <if test="pickStatus !=null">
+		    and pick_status = #{pickStatus}
+		   </if>
+		    <if test="parentId !=null">
+		    and parent_id = #{parentId}
+		   </if>
+		 </where> 
+		 order by update_time desc 
+	</select>
+	
+	<update id="updateStatusByParam" parameterType="com.yunkouan.wms.modules.send.entity.SendPick">
+		update send_pick
+		  set pick_status =  #{pickStatus},
+		   	  update_person = #{updatePerson},
+		   	  update_time = now()
+		 <where> 
+		 	<if test="orgId !=null">
+		   		org_id = #{orgId}
+		   	</if>
+		   	<if test="warehouseId !=null">
+		   		and warehouse_id = #{warehouseId}
+		   	</if>
+		 	<if test="deliveryId !=null">
+		    	and delivery_id = #{deliveryId}
+		   	</if>
+		   	<if test="waveId !=null">
+		    	and wave_id = #{waveId}
+		   	</if>	
+		 </where>
+	</update>
+	
+	<update id="incPrintTimes" parameterType="com.yunkouan.wms.modules.send.entity.SendPick">
+		update send_pick
+		 set pick_bill_print_times = ifnull(pick_bill_print_times,0) + 1
+		 where pick_id = #{pickId}
+	</update>
+	
+	<select id="qryPrintList"  parameterType="com.yunkouan.wms.modules.send.vo.SendPickVo" resultType="com.yunkouan.wms.modules.send.entity.SendPick">
+		SELECT p.* 
+			FROM send_pick p,send_delivery d
+			WHERE 1=1
+			  <if test="srcNo !=null and srcNo != ''">
+			  	AND d.src_no = #{srcNo}
+			  </if>
+			  <if test="expressServiceCode !=null and expressServiceCode != ''">
+			  	AND d.express_service_code = #{expressServiceCode}
+			  </if>
+			  <if test="expressBillNo !=null and expressBillNo != ''">
+			  	AND d.express_bill_no = #{expressBillNo}
+			  </if>
+			  <if test="expressPrintStatus !=null">
+			  		<if test="expressPrintStatus ==1">
+			    		AND d.express_bill_print_times > 0
+			    	</if>
+			    	<if test="expressPrintStatus ==0">
+			    		AND d.express_bill_print_times is null
+			    	</if>
+			  </if>
+			  <if test="beginTime !=null and endTime != null">
+			    AND d.order_time BETWEEN CONCAT(#{beginTime},' 00:00:00') AND CONCAT(#{endTime},' 23:59:59')
+			   </if>
+			  <if test="orgId !=null and orgId != ''">
+			  	AND d.org_id = #{orgId}
+			  </if>
+			  <if test="warehouseId !=null and warehouseId != ''">
+			  	AND d.warehouse_id = #{warehouseId}
+			  </if>
+			   AND p.delivery_id = d.delivery_id
+			  <if test="pickNo !=null and pickNo != ''">
+			  	AND p.pick_no = #{pickNo}
+			  </if>
+			  <if test="pickPrintStatus !=null">
+			  		<if test="pickPrintStatus ==1">
+			    		AND p.pick_bill_print_times > 0
+			    	</if>
+			    	<if test="pickPrintStatus ==0">
+			    		AND p.pick_bill_print_times is null
+			    	</if>
+			   </if>
+			   AND p.pick_status > 10 
+			   AND p.pick_status != 99
+			  order by p.create_time desc		   
+	</select>
+	<!-- 待处理的拣货单 -->
+	<select id="getTask" parameterType="String" resultType="String">
+		select warehouse_id from send_pick where pick_status=10 and org_id=#{orgId}
+	</select>
+</mapper>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.inv.dao.ICountDetailDao">
+	<sql id="table_name">
+		inv_count_detail
+	</sql>
+	
+	<!-- 后台 - 新增调账单详情 add by 王通 -->
+	<insert id="add" parameterType="InvCountDetail">
+		INSERT INTO
+		<include refid="table_name" />
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			count_detail_id,  count_id,  location_id,  org_id,
+  			warehouse_id,  sku_id,  batch_no,  asn_id,
+  			asn_detail_id,  stock_qty,  in_stock_date,
+  			create_person,  create_time,  update_person,
+  			update_time
+	    </trim>
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," > 
+		(
+			#{item.countDetailId},
+			#{item.countId},
+			#{item.locationId},
+			#{item.orgId},
+			#{item.warehouseId},
+			#{item.skuId},
+			#{item.batchNo},
+			#{item.asnId},
+			#{item.asnDetailId},
+			#{item.stockQty},
+			#{item.inStockDate},
+			#{item.createPerson},
+			#{item.createTime},
+			#{item.updatePerson},
+			#{item.updateTime}
+		)
+		</foreach>
+	</insert>
+	<!-- 根据货品明细、批次数量和库位，查询货品库存列表 add by 王通 -->
+	<select id="selectLocationCount" parameterType="InvCountVO" resultType="Integer">
+	SELECT 
+		COUNT(DISTINCT location_id) 
+		FROM inv_count_detail
+		WHERE count_id = #{invCount.countId}
+	</select>
+	<!-- 根据货品明细、批次数量和库位，查询货品库存列表 add by 王通 -->
+	<select id="selectCountDetail" parameterType="String" resultType="InvCountDetail">
+	SELECT 
+		t1.*
+		FROM inv_count_detail t1, meta_location t2
+		WHERE t1.count_id = #{id}
+		AND t1.location_id = t2.location_id
+		ORDER BY t2.location_no, t1.sku_id
+	</select>
+	
+</mapper>

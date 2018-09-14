@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.send.dao.IDeliveryDao">
+	<!-- 查询发货单列表 -->
+	<select id="qryList"  parameterType="com.yunkouan.wms.modules.send.entity.SendDelivery" resultType="com.yunkouan.wms.modules.send.entity.SendDelivery">
+		select * 
+		 from send_delivery		 
+		 <where>
+		    <if test="orgId !=null">
+		 	 org_id = #{orgId}
+		 	</if>
+		   <if test="warehouseId !=null">
+		   	and warehouse_id = #{warehouseId}
+		   </if>
+		   <if test="owner !=null">
+		    and owner = #{owner}
+		   </if>
+		   <if test="srcNo !=null">
+		    and src_no = #{srcNo}
+		   </if>
+		   <if test="deliveryNo !=null">
+		    and delivery_no = #{deliveryNo}
+		   </if>
+		   <if test="waveId !=null">
+		    and wave_id = #{waveId}
+		   </if>
+		   <if test="deliveryStatus !=null">
+		    and delivery_status = #{deliveryStatus}
+		   </if>	   
+		 </where>
+		   order by update_time desc		   
+	</select>
+	
+	<!-- 查询没有关联波次单且没有拣完货的发货单列表 -->
+	<select id="qryListNotFinish"  parameterType="java.util.Map" resultType="com.yunkouan.wms.modules.send.entity.SendDelivery">
+		select * 
+		 from send_delivery		 
+		 	org_id = #{orgId}
+		   and warehouse_id = #{warehouseId}
+		   and wave_id is null
+		   and (delivery_status = 90 or	delivery_status = 95)	
+		   and order_qty > 0   
+		   order by update_time desc		   
+	</select>
+	
+	<!-- 更新波次单号 -->
+	<update id="updateWaveId" parameterType="com.yunkouan.wms.modules.send.entity.SendDelivery">
+		 update send_delivery
+		 	set wave_id = #{waveId}
+		 where delivery_id = #{deliveryId}
+		   and delivery_status = #{deliveryStatus}
+	</update>
+	
+	<!-- 批量修改波次单号 -->
+	<update id="batchUpdateWaveId" parameterType="java.util.Map">
+		 update send_delivery
+		 	set wave_id = #{waveId},
+		 	    update_person = #{operator},
+		 	    update_time = #{updateTime}
+		 where delivery_id in
+		 <foreach item="item" index="index" collection="deliveryIds" open="(" separator="," close=")">  
+			 #{item}  
+		 </foreach>
+		   and delivery_status = #{deliveryStatus}
+	</update>
+	
+	<!-- 批量修改波次单号 -->
+	<update id="delWaveId" parameterType="java.util.Map">
+		 update send_delivery
+		 	set wave_id = null,
+		 	    update_person = #{operator},
+		 	    update_time = now()
+		 where 
+		   org_id = #{orgId}
+		   and warehouse_id = #{warehouseId}
+		   and wave_id = #{waveId}
+		   and delivery_status = #{deliveryStatus}
+	</update>
+
+	<!-- 批量修改波次单号 -->
+	<update id="updateStatusByWaveId" parameterType="com.yunkouan.wms.modules.send.entity.SendDelivery">
+		 update send_delivery
+		 	set delivery_status = #{deliveryStatus},
+		 	    update_person = #{operator},
+		 	    update_time = now()
+		 where 
+		   org_id = #{orgId}
+		   and warehouse_id = #{warehouseId}
+		   and wave_id = #{waveId}
+	</update>
+
+	<update id="incExpressPrintTimes" parameterType="String">
+		update send_delivery
+		set express_bill_print_times = ifnull(express_bill_print_times,0) + 1
+		where delivery_id = #{deliveryId}
+	</update>
+	
+	<select id="qryOutStaticsList"  parameterType="com.yunkouan.wms.modules.send.vo.SendPickLocationVo" resultType="com.yunkouan.wms.modules.send.vo.SendStasticsVo">
+		SELECT t4.src_no src_no,
+		       t4.express_bill_no express_bill_no,
+		       t5.sku_name sku_name,
+		       t5.sku_bar_code sku_bar_code,
+		       t5.sku_no sku_no,
+		       t7.merchant_name merchant_name,
+		       t4.order_time order_time,
+		       t2.order_qty order_qty,
+		       t1.pick_qty sendQty,
+		       t5.measure_unit measure_unit,
+		       t6.location_no location_no,
+		       t4.update_time out_date, 
+		       (select user_name oper_person from sys_user where user_id = t4.update_person) oper_person
+		FROM send_pick_location t1,
+			send_pick_detail t2,
+			send_delivery_detail t3,
+			send_delivery t4,
+			meta_sku t5,
+			meta_location t6,
+			meta_merchant t7
+		WHERE t4.delivery_status = 96
+		 <if test="locationNo != null and locationNo != ''">
+		  AND t6.location_no = #{locationNo}
+		 </if>
+		  <if test="srcNo != null and srcNo != ''">
+		  AND t4.src_no = #{srcNo}
+		 </if>
+		 <if test="expressBillNo != null and expressBillNo != ''">
+		  AND t4.express_bill_no = #{expressBillNo}
+		</if>
+		 <if test="expressServiceCode != null and expressServiceCode != ''"> 
+		  AND t4.express_service_code = #{expressServiceCode}
+		 </if>
+		 <if test="beginTime != null and beginTime != ''">
+		  AND t4.update_time >= CONCAT(#{beginTime},' 00:00:00')
+		</if>
+		 <if test="endTime != null and endTime != ''">
+		  AND t4.update_time &lt;= CONCAT(#{endTime},' 23:59:59')
+		 </if>
+		 <if test="orgId != null and orgId != ''">
+		  AND t4.org_id = #{orgId}
+		 </if>
+		 <if test="warehouseId != null and warehouseId != ''">
+		  AND t4.warehouse_id = #{warehouseId}
+		 </if>
+		 AND t3.delivery_id = t4.delivery_id
+		 AND t2.delivery_detail_id = t3.delivery_detail_id
+		 <if test="skuBarCode != null and skuBarCode != ''">
+		  AND t5.sku_bar_code = #{skuBarCode} 
+		 </if>
+		 <if test="skuNo != null and skuNo != ''">
+		  AND t5.sku_no = #{skuNo} 
+		 </if>
+		 <if test="skuName != null and skuName != ''">
+		  AND t5.sku_name like CONCAT('%',#{skuName},'%' )
+		 </if>
+		  AND t5.owner = t7.merchant_id
+		  AND t3.sku_id = t5.sku_id	
+		 <if test="ownerName != null and ownerName != ''">
+		  AND t7.merchant_name like CONCAT('%',#{ownerName},'%' )
+		 </if>
+		  AND t1.pick_detail_id = t2.pick_detail_id 
+		  AND t1.pick_type = 2
+		  AND t1.location_id = t6.location_id
+		ORDER BY t1.update_time desc
+	</select>
+	
+	<select id="selectTotalOrder"  parameterType="com.yunkouan.wms.modules.send.vo.SendDeliveryVo" resultType="com.yunkouan.wms.modules.send.vo.TotalVo">
+		select sum(order_qty) total1, sum(gross_weight) total2, sum(scalage_weight) total3
+		 from send_delivery		 
+		 <where>
+		    <if test="sendDelivery.orgId !=null and sendDelivery.orgId !=''">
+		 	 org_id = #{sendDelivery.orgId}
+		 	</if>
+		   <if test="sendDelivery.warehouseId !=null and sendDelivery.warehouseId !=''">
+		   	and warehouse_id = #{sendDelivery.warehouseId}
+		   </if>
+		   <if test="sendDelivery.owner !=null and sendDelivery.owner !=''">
+		    and owner = #{sendDelivery.owner}
+		   </if>
+		   <if test="sendDelivery.sender !=null and sendDelivery.sender !=''">
+		    and sender = #{sendDelivery.sender}
+		   </if>
+		   <if test="sendDelivery.contactPerson !=null and sendDelivery.contactPerson !=''">
+		    and contact_person = #{sendDelivery.contactPerson}
+		   </if>
+		   <if test="sendDelivery.contactPhone !=null and sendDelivery.contactPhone !=''">
+		    and contact_phone = #{sendDelivery.contactPhone}
+		   </if>
+		   <if test="sendDelivery.province !=null and sendDelivery.province !=''">
+		    and province = #{sendDelivery.province}
+		   </if>
+		   <if test="sendDelivery.city !=null and sendDelivery.city !=''">
+		    and city = #{sendDelivery.city}
+		   </if>
+		   <if test="sendDelivery.county !=null and sendDelivery.county !=''">
+		    and county = #{sendDelivery.county}
+		   </if>
+		   <if test="sendDelivery.docType !=null">
+		    and doc_type = #{sendDelivery.docType}
+		   </if>
+		   <if test="sendDelivery.srcNo !=null and sendDelivery.srcNo !=''">
+		    and src_no = #{sendDelivery.srcNo}
+		   </if>
+		   <if test="sendDelivery.deliveryNo !=null and sendDelivery.deliveryNo !=''">
+		    and delivery_no = #{sendDelivery.deliveryNo}
+		   </if>
+		   <if test="sendDelivery.expressServiceCode !=null and sendDelivery.expressServiceCode !=''">
+		    and express_service_code = #{sendDelivery.expressServiceCode}
+		   </if>
+		   <if test="sendDelivery.expressBillNo !=null and sendDelivery.expressBillNo !=''">
+		    and express_bill_no = #{sendDelivery.expressBillNo}
+		   </if>
+		   <if test="waveIsNull !=null and wareIsNull">
+		    and ware_id is null
+		   </if>
+		   <if test="sendDelivery.waveId !=null and sendDelivery.waveId !=''">
+		    and wave_id = #{sendDelivery.waveId}
+		   </if>
+		   <if test="sendDelivery.deliveryStatus !=null">
+		    and delivery_status = #{sendDelivery.deliveryStatus}
+		   </if>	   
+		   <if test="deliveryStatusList !=null">
+		    and delivery_status in 
+			    <foreach item="item" index="index" collection="deliveryStatusList" open="(" separator="," close=")">  
+				 #{item}  
+				</foreach>
+		   </if>
+		   <if test="loadConfirmIds !=null">
+		    and delivery_id in 
+			    <foreach item="item" index="index" collection="loadConfirmIds" open="(" separator="," close=")">  
+				 #{item}  
+				</foreach>
+		   </if>
+		   <if test="notInDeliveryIdList !=null">
+		    and delivery_id not in 
+			    <foreach item="item" index="index" collection="notInDeliveryIdList" open="(" separator="," close=")">  
+				 #{item}  
+				</foreach>
+		   </if>
+		   <if test="greaterThanStatus !=null">
+		    and delivery_status &gt; #{greaterThanStatus}
+		   </if>	   
+		   <if test="lessThanStatus !=null">
+		    and delivery_status &lt; #{lessThanStatus}
+		   </if>	   
+		   <if test="beginTime !=null and beginTime != ''">
+		    and order_time &gt;= #{beginTime}
+		   </if>	 
+		   <if test="endTime !=null and endTime != ''">
+		    and order_time &lt; #{endTime}
+		   </if>	 
+		   <if test="sendStartTime != null and sendStartTime != ''">
+		    and shipment_time &gt;= #{sendStartTime}
+		   </if> 
+		   <if test="sendEndTime != null and sendEndTime != ''">
+		    and shipment_time &lt;= #{sendEndTime}
+		   </if> 
+		   <if test="merchantIdList !=null">
+		    and owner in 
+			    <foreach item="item" index="index" collection="merchantIdList" open="(" separator="," close=")">  
+				 #{item}  
+				</foreach>
+		   </if>  
+		   <if test="provinceName !=null and sendDelivery.orgId !=''">
+		    and province like #{provinceName}
+		   </if>	   
+		   <if test="sendDelivery.receiver !=null and sendDelivery.receiver !=''">
+		    and receiver like #{sendDelivery.receiver}
+		   </if>	  
+		   <if test="cityName !=null and cityName !=''">
+		    and city like #{cityName}
+		   </if>	    
+		   <if test="countyName !=null and countyName !=''">
+		    and county like #{countyName}
+		   </if>	 
+		   <if test="srcNoLike !=null and srcNoLike !=''">
+		    and src_no like #{srcNoLike}
+		   </if>	   
+		   <if test="deliveryNoLike !=null and deliveryNoLike !=''">
+		    and delivery_no like #{deliveryNoLike}
+		   </if>	  
+		   <if test="hasAllPick !=null and hasAllPick">
+		    and order_qty &gt; pick_qty
+		   </if>	
+		   <if test="statusLessThan !=null">
+		    and delivery_status &lt; #{statusLessThan}
+		   </if>	   
+		   <if test="greaterThanUpdateTime !=null">
+		    and update_time &gt;= #{greaterThanUpdateTime}
+		   </if>	
+		   <if test="warehouseIdList !=null">
+		    and warehouse_id in 
+			    <foreach item="item" index="index" collection="warehouseIdList" open="(" separator="," close=")">  
+				 #{item}  
+				</foreach>
+		   </if>       
+		   <if test="sendDelivery.expressBillPrintTimes !=null">
+		    and express_bill_print_times &gt;= #{sendDelivery.expressBillPrintTimes}
+		   </if>	
+		   <if test="sendDelivery.expressBillPrintTimes !=null and sendDelivery.expressBillPrintTimes &lt;= 0">
+		    and express_bill_print_times is null
+		   </if>	
+		 </where> 
+	</select>
+	
+	<select id="selectTotalSend"  parameterType="com.yunkouan.wms.modules.send.vo.SendPickLocationVo" resultType="com.yunkouan.wms.modules.send.vo.TotalVo">
+		SELECT count(t5.sku_id) total1, sum(t2.order_qty) total2, sum(t1.pick_qty) total3
+		FROM send_pick_location t1,
+			send_pick_detail t2,
+			send_delivery_detail t3,
+			send_delivery t4,
+			meta_sku t5,
+			meta_location t6,
+			meta_merchant t7
+		WHERE t4.delivery_status = 96
+		 <if test="srcNo != null and srcNo != ''">
+		  AND t4.src_no = #{srcNo}
+		 </if>
+		 <if test="expressBillNo != null and expressBillNo != ''">
+		  AND t4.express_bill_no = #{expressBillNo}
+		</if>
+		 <if test="expressServiceCode != null and expressServiceCode != ''"> 
+		  AND t4.express_service_code = #{expressServiceCode}
+		 </if>
+		 <if test="beginTime != null and beginTime != ''">
+		  AND t4.update_time >= CONCAT(#{beginTime},' 00:00:00')
+		</if>
+		 <if test="endTime != null and endTime != ''">
+		  AND t4.update_time &lt;= CONCAT(#{endTime},' 23:59:59')
+		 </if>
+		 <if test="orgId != null and orgId != ''">
+		  AND t4.org_id = #{orgId}
+		 </if>
+		 <if test="warehouseId != null and warehouseId != ''">
+		  AND t4.warehouse_id = #{warehouseId}
+		 </if>
+		 AND t3.delivery_id = t4.delivery_id
+		 AND t2.delivery_detail_id = t3.delivery_detail_id
+		 <if test="skuBarCode != null and skuBarCode != ''">
+		  AND t5.sku_bar_code = #{skuBarCode} 
+		 </if>
+		 <if test="skuNo != null and skuNo != ''">
+		  AND t5.sku_no = #{skuNo} 
+		 </if>
+		 <if test="skuName != null and skuName != ''">
+		  AND t5.sku_name like CONCAT('%',#{skuName},'%' )
+		 </if>
+		  AND t5.owner = t7.merchant_id
+		  AND t3.sku_id = t5.sku_id	
+		 <if test="ownerName != null and ownerName != ''">
+		  AND t7.merchant_name like CONCAT('%',#{ownerName},'%' )
+		 </if>
+		  AND t1.pick_detail_id = t2.pick_detail_id 
+		  AND t1.pick_type = 2
+		  AND t1.location_id = t6.location_id
+	</select>
+	
+	<!-- 待处理的发货单 -->
+	<select id="getTask" parameterType="String" resultType="String">
+		select warehouse_id from send_delivery where delivery_status=10 and org_id=#{orgId}
+	</select>
+</mapper>

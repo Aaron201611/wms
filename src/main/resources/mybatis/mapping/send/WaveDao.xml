@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.send.dao.IWaveDao">
+	<!-- 查询拣货单列表 -->
+	<select id="qryList" parameterType="com.yunkouan.wms.modules.send.entity.SendWave"
+		resultType="com.yunkouan.wms.modules.send.entity.SendWave">
+		select *
+		from send_wave
+		<where>
+			<if test="orgId !=null">
+				org_id = #{orgId}
+			</if>
+			<if test="warehouseId !=null">
+				and warehouse_id = #{warehouseId}
+			</if>
+			<if test="waveNo !=null">
+				and wave_no = #{waveNo}
+			</if>
+			<if test="deliveryAmount !=null">
+				and delivery_amount = #{deliveryAmount}
+			</if>
+		</where>
+		order by update_time desc
+	</select>
+
+
+	<!-- 待处理的波次拣货单 -->
+	<select id="getTask" parameterType="String" resultType="String">
+		select
+		warehouse_id from send_wave where wave_status=10 and org_id=#{orgId}
+	</select>
+
+</mapper>

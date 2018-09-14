@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.inv.dao.IShiftDao">
+	<sql id="table_name">
+		inv_shift t1
+	</sql>
+	
+	<!-- 页面 - 查询移位单列表 add by 王通 -->
+	<select id="list" parameterType="InvShiftVO" resultType="InvShift">
+		SELECT distinct
+			t1.shift_id,  t1.shift_no,  t1.shift_type,  t1.shift_status,  t1.create_person,  t1.create_time,  
+			t1.op_person, t1.op_time, t1.note,  t1.org_id,  t1.warehouse_id,  t1.update_person,  
+			t1.update_time,  t1.shift_id2, t1.involve_bill
+		FROM 
+			inv_shift t1 
+			LEFT JOIN inv_shift_detail t2
+			ON t1.shift_id = t2.shift_id
+		<where>
+			t1.warehouse_id = #{invShift.warehouseId}
+			AND t1.org_id = #{invShift.orgId}
+			<if test="shiftIdList != null">
+				AND t1.shift_id in
+				<foreach collection="shiftIdList" item="item" index="index" open="(" separator="," close=")" > 
+					#{item}
+				</foreach>
+			</if> 
+			<if test="inLocationName != null and inLocationName != ''">
+				AND EXISTS 
+				(	SELECT 1 
+					FROM meta_location t3
+					WHERE 
+						t2.in_location = t3.location_id 
+						AND t3.location_status = 20
+						AND t3.location_name like #{inLocationName} 
+				)
+			</if>
+			<if test="outLocationName != null and outLocationName != ''">
+				AND EXISTS 
+				(	SELECT 1 
+					FROM meta_location t4
+					WHERE 
+						t2.out_location = t4.location_id 
+						AND t4.location_status = 20
+						AND t4.location_name like #{outLocationName} 
+				)
+			</if>
+			<if test="invShift.shiftStatus != null">
+				AND t1.shift_status = #{invShift.shiftStatus}
+			</if>
+			<if test="invShift.shiftStatus == null">
+				AND t1.shift_status != 99
+			</if>
+		</where>
+		ORDER BY t1.create_time DESC
+	</select>
+	
+	<!-- 页面 - 查询移位单详情 add by 王通 -->
+	<select id="find" parameterType="String" resultType="InvShift">
+		SELECT 
+			t1.shift_id, t1.shift_no, t1.shift_type,  t1.shift_status,  t1.create_person,  t1.create_time,  
+			t1.op_person,  t1.note,  t1.org_id,  t1.warehouse_id,  t1.update_person,  
+			t1.update_time,  t1.shift_id2
+		FROM 
+			<include refid="table_name" />
+		<where>
+			AND t1.shift_id = #{id}
+			AND t1.shift_status != 99
+		</where>
+	</select>
+	<!-- 页面 - 新增移位单 add by 王通 -->
+	<insert id="add" parameterType="InvShift">
+		INSERT INTO inv_shift
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			shift_id, shift_no, shift_type,  shift_status,  create_person,  create_time,  
+			op_person,  note,  org_id,  warehouse_id,  update_person,  
+			update_time
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{shiftId}, #{shiftNo},  #{shiftType},  #{shiftStatus},  #{createPerson},  #{createTime},  
+			#{opPerson},  #{note},  #{orgId},  #{warehouseId},  #{updatePerson},
+			#{updateTime}
+		</trim>
+	</insert>
+	<!-- 后台 - 查询移位单预分配详情 add by 王通 -->
+	<select id="getOutLockDetail" parameterType="InvShiftVO" resultType="InvShiftVO">
+		SELECT 
+			t1.shift_no,  t1.shift_status,  
+			SUM(t2.shift_qty) total_qty
+		FROM 
+			inv_shift t1, inv_shift_detail t2
+		<where>
+			t1.shift_id = t2.shift_id
+			AND t1.shift_status IN
+			<foreach collection="listInvShiftStatus" item="item" index="index" open="(" separator="," close=")" > 
+				#{item}
+			</foreach>
+			<foreach collection="listInvShiftDetailVO" item="item" index="index" > 
+				AND t2.out_location = #{item.invShiftDetail.outLocation}
+				AND t2.sku_id = #{item.invShiftDetail.skuId}
+				AND t2.batch_no = #{item.invShiftDetail.batchNo}
+				AND t2.org_id = #{item.invShiftDetail.orgId}
+				AND t2.warehouse_id = #{item.invShiftDetail.warehouseId}
+			</foreach>
+		</where>
+		GROUP BY t1.shift_no
+	</select>
+	
+	<select id="getTask" parameterType="String" resultType="String">
+		select
+		warehouse_id from inv_shift where shift_status=10 and org_id=#{orgId}
+	</select>
+</mapper>

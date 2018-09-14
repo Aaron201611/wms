@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.saas.modules.sys.dao.ILocationDao">
+	<cache type="com.yunkouan.cache.RedisCache4Mybatis">
+		<property name="eternal" value="true"/>
+	    <property name="maxEntriesLocalHeap" value="1000"/>
+	    <property name="maxEntriesLocalDisk" value="10000000"/>
+	    <property name="memoryStoreEvictionPolicy" value="LRU"/>
+	</cache>
+
+	<!-- 增加/减少库容度 add by andy -->
+	<!--
+	<update id="updateCapacity" parameterType="MetaLocationVO">
+		UPDATE meta_location
+		<set>
+			<if test="location.usedCapacity != null">
+				used_capacity = #{location.usedCapacity}
+			</if>
+			<if test="location.preusedCapacity != null">
+				, preused_capacity = #{location.preusedCapacity}
+			</if>
+			 , capacity_use_rate=ROUND(used_capacity/max_capacity*100,2)
+		</set>
+		WHERE
+			location_id = #{location.locationId}
+	</update>
+	-->
+	
+	<!-- 更新最大库容 -->
+	<!--
+	<update id="updateMaxCapacity" parameterType="MetaLocationVO">
+		UPDATE meta_location
+		<set>
+			max_capacity = #{location.maxCapacity}
+			 , capacity_use_rate=ROUND(used_capacity/max_capacity*100,2)
+		</set>
+		WHERE
+			spec_id = #{location.specId}
+	</update>
+	-->
+	
+	
+	<!-- 增加/减少库容度 add by andy -->
+	<!--
+	<update id="addCapacity" parameterType="MetaLocationVO">
+		UPDATE meta_location
+		<set>
+			<if test="location.usedCapacity != null">
+				used_capacity = used_capacity + #{location.usedCapacity}
+			</if>
+			<if test="location.preusedCapacity != null">
+				, preused_capacity = preused_capacity + #{location.preusedCapacity}
+			</if>
+			 , capacity_use_rate=ROUND(used_capacity/max_capacity*100,2)
+		</set>
+		WHERE
+			location_id = #{location.locationId}
+			<if test="location.usedCapacity != null and location.usedCapacity != 0">
+				<if test="location.usedCapacity &gt; 0">
+					 and max_capacity - used_capacity - preused_capacity >= #{location.usedCapacity}
+				</if>
+				<if test="location.usedCapacity &lt; 0">
+					 and #{location.usedCapacity} + used_capacity >= 0 
+				</if>
+			</if>
+			<if test="location.preusedCapacity != null and location.preusedCapacity != 0">
+				<if test="location.usedCapacity > 0">
+					 and preused_capacity >= #{location.preusedCapacity}
+				</if>
+			</if>
+	</update>
+	-->
+	
+	<!-- 增加/减少预分配库容度 add by andy -->
+	<!--
+	<update id="addPreusedCapacity" parameterType="MetaLocationVO">
+		UPDATE meta_location
+		<set>
+			<if test="location.preusedCapacity != null">
+				preused_capacity = preused_capacity + #{location.preusedCapacity}
+			</if>
+		</set>
+		WHERE
+			location_id = #{location.locationId}
+			<if test="location.preusedCapacity != null and location.preusedCapacity != 0">
+				<if test="location.preusedCapacity &gt; 0">
+					 and max_capacity - used_capacity - preused_capacity >= #{location.preusedCapacity}
+				</if>
+				<if test="location.usedCapacity &lt; 0">
+					 and #{location.preusedCapacity} + preused_capacity >= 0 
+				</if>
+			</if>
+	</update>
+	-->
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.sys.dao.IRoleAuthDao">
+	<resultMap type="com.yunkouan.wms.modules.sys.entity.SysRoleAuth" id="authMap">
+	    <id column="role_auth_id" property="roleAuthId" />
+	    <result column="role_id" property="roleId" />
+	    <result column="org_auth_id" property="orgAuthId" />
+	    <result column="auth_id" property="authId" />
+	    <result column="auth_name" property="authName" />
+	    <result column="auth_url" property="authUrl" />
+	</resultMap>
+
+	<select id="list" parameterType="sysRoleAuth" resultMap="authMap" useCache="false">
+		select distinct r.role_auth_id, r.role_id, r.org_auth_id, a.auth_id, a.auth_name, a.auth_url 
+		from sys_role_auth r, sys_org_auth o, sys_auth a 
+		where o.org_auth_id = r.org_auth_id 
+		and a.auth_id = o.auth_id 
+		<if test="roleId != null and roleId != '' ">
+			and r.role_id = #{roleId}
+		</if>
+		<if test="orgId != null and orgId != '' ">
+			and r.org_id = #{orgId} and o.org_id = #{orgId}
+		</if>
+		<if test="parentId != null and parentId != '' ">
+			and a.parent_id = #{parentId}
+		</if>
+		<if test="authStatus != null">
+			and a.auth_status = #{authStatus}
+		</if>
+	</select>
+
+	<select id="query" parameterType="sysRoleAuth" resultMap="authMap" useCache="false">
+		select distinct o.org_auth_id, a.auth_id, a.auth_name, a.auth_url 
+		from sys_org_auth o, sys_auth a 
+		where a.auth_id = o.auth_id 
+		<if test="orgId != null and orgId != '' ">
+			and o.org_id = #{orgId}
+		</if>
+		<if test="parentId != null and parentId != '' ">
+			and a.parent_id = #{parentId}
+		</if>
+		<if test="authStatus != null">
+			and a.auth_status = #{authStatus}
+		</if>
+		<if test="authLevelMin != null">
+			and a.auth_level > #{authLevelMin}
+		</if>
+		<if test="authLevel != null">
+			and a.auth_level = #{authLevel}
+		</if>
+	</select>
+
+</mapper>

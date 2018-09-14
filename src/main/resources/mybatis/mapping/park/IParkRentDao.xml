@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.park.dao.IParkRentDao">
+	<!-- 查询发货单列表 -->
+	<select id="qryList"  parameterType="java.util.Map" resultType="com.yunkouan.wms.modules.park.entity.ParkRent">
+		select * 
+		 from park_rent	 
+		 <where>
+		    <if test="orgList !=null">
+		        org_id in
+		       <foreach item="item" index="index" collection="orgList" open="(" separator="," close=")">  
+			 		#{item}  
+		 		</foreach>
+		 	</if>
+		   <if test="whList !=null">
+		     and warehouse_id in
+		    	<foreach item="item" index="index" collection="whList" open="(" separator="," close=")">  
+			 		#{item}  
+		 		</foreach>
+		   </if>
+		   <if test="merchantList !=null">
+		    and  merchant_id in
+		    <foreach item="item" index="index" collection="merchantList" open="(" separator="," close=")">  
+			 		#{item}  
+		 	</foreach>
+		   </if>
+		   <if test="rentStatus !=null">
+		    and rent_status = #{rentStatus}
+		   </if>	   
+		 </where>
+		   order by update_time desc		   
+	</select>
+
+	
+</mapper>

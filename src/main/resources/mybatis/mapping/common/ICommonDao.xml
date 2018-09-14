@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.common.dao.ICommonDao">
+	<sql id="table_name">
+		sequence
+	</sql>
+
+	<!-- 后台 - 查询下一个序列值  add by tphe06 -->
+	<select id="getSequence" parameterType="CommonVo" resultType="Integer">
+		SELECT current_value FROM sequence
+		WHERE SEQ_NAME = #{fieldName}
+		AND ORG_ID = #{orgId}
+		<if test="warehouseId != null and warehouseId != '' ">
+			AND WAREHOUSE_ID= #{warehouseId}
+		</if>
+	</select>
+	<!-- 后台 - 新增一条序列  add by tphe06 -->
+	<update id="updateSequence" parameterType="CommonVo">
+		UPDATE sequence SET current_value = current_value + s_increment
+		WHERE SEQ_NAME = #{fieldName}
+		AND ORG_ID = #{orgId}
+		<if test="warehouseId != null and warehouseId != '' ">
+			AND WAREHOUSE_ID= #{warehouseId}
+		</if>
+	</update>
+	<!-- 后台 - 新增一条序列  add by tphe06 -->
+	<insert id="addSequence" parameterType="CommonVo">
+		insert into 
+		<include refid="table_name" />
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			id,
+			org_id,
+			warehouse_id,
+			seq_name,
+			current_value,
+			s_increment
+		</trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides=",">
+	    	#{id},
+			#{orgId},
+			#{warehouseId},
+			#{fieldName},
+			0,
+			1
+		</trim>
+	</insert>
+
+
+	<!-- 后台 - 查询下一个序列值  add by 王通 -->
+	<select id="getSeq" parameterType="CommonVo" resultType="Integer">
+		SELECT nextval(#{fieldName} , #{orgId}, #{warehouseId}) FROM dual;
+	</select>
+	<!-- 后台 - 新增一条序列  add by 王通 -->
+	<insert id="addSeq" parameterType="CommonVo">
+		insert into 
+		<include refid="table_name" />
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			org_id,
+			warehouse_id,
+			seq_name,
+			current_value,
+			s_increment
+		</trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{orgId},
+			#{warehouseId},
+			#{fieldName},
+			0,
+			1
+		</trim>
+	</insert>
+</mapper>

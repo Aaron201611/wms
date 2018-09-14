@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.common.dao.ISeqDao">
+	<select id="getAccSeq" resultType="Long">
+		select seq_account_id.Nextval from dual
+	</select>
+	<select id="getAccRoleSeq" resultType="Long">
+		select seq_account_role_id.Nextval from dual
+	</select>
+	<select id="getAdjustDetailSeq" resultType="Long">
+		select seq_adjust_detail_id.Nextval from dual
+	</select>
+	<select id="getAdjustSeq" resultType="Long">
+		select seq_adjust_id.Nextval from dual
+	</select>
+	<select id="getAdministratorRoleSeq" resultType="Long">
+		select seq_adminrole_id.Nextval from dual
+	</select>
+	<select id="getAdminSeq" resultType="Long">
+		select seq_admin_id.Nextval from dual
+	</select>
+	<select id="getAdminRoleAuthSeq" resultType="Long">
+		select seq_admin_role_auth_id.Nextval from dual
+	</select>
+	<select id="getAdminRoleSeq" resultType="Long">
+		select seq_admin_role_id.Nextval from dual
+	</select>
+	<select id="getAreaSeq" resultType="Long">
+		select seq_area_id.Nextval from dual
+	</select>
+	<select id="getAsnDetailSeq" resultType="Long">
+		select seq_asn_detail_id.Nextval from dual
+	</select>
+	<select id="getAsnSeq" resultType="Long">
+		select seq_asn_id.Nextval from dual
+	</select>
+	<select id="getAuthSeq" resultType="Long">
+		select seq_auth_id.Nextval from dual
+	</select>
+	<select id="getBusinessStaticSeq" resultType="Long">
+		select SEQ_BUSINESS_STATIC_ID.Nextval from dual
+	</select>
+	<select id="getCountDetailSeq" resultType="Long">
+		select seq_count_detail_id.Nextval from dual
+	</select>
+	<select id="getCountSeq" resultType="Long">
+		select seq_count_id.Nextval from dual
+	</select>
+	<select id="getDeliveryDetailSeq" resultType="Long">
+		select seq_delivery_detail_id.Nextval from dual
+	</select>
+	<select id="getDeliverySeq" resultType="Long">
+		select seq_delivery_id.Nextval from dual
+	</select>
+	<select id="getDockSeq" resultType="Long">
+		select seq_dock_id.Nextval from dual
+	</select>
+	<select id="getExpLogSeq" resultType="Long">
+		select seq_exp_log_id.Nextval from dual
+	</select>
+	<select id="getFingerSeq" resultType="Long">
+		select seq_finger_id.Nextval from dual
+	</select>
+	<select id="getInterfaceSeq" resultType="Long">
+		select seq_interface_id.Nextval from dual
+	</select>
+	<select id="getLocationSeq" resultType="Long">
+		select seq_location_id.Nextval from dual
+	</select>
+	<select id="getLocationSpecSeq" resultType="Long">
+		select seq_location_spec_id.Nextval from dual
+	</select>
+	<select id="getInvLogSeq" resultType="Long">
+		select seq_log_id.Nextval from dual
+	</select>
+	<select id="getMachineSeq" resultType="Long">
+		select seq_machine_id.Nextval from dual
+	</select>
+	<select id="getMerchantSeq" resultType="Long">
+		select seq_merchant_id.Nextval from dual
+	</select>
+	<select id="getOpLogSeq" resultType="Long">
+		select seq_oplog_id.Nextval from dual
+	</select>
+	<select id="getOrgAuthSeq" resultType="Long">
+		select seq_org_auth_id.Nextval from dual
+	</select>
+	<select id="getOrgSeq" resultType="Long">
+		select seq_org_id.Nextval from dual
+	</select>
+	<select id="getOrgStrategySeq" resultType="Long">
+		select seq_org_strategy_id.Nextval from dual
+	</select>
+	<select id="getPackSeq" resultType="Long">
+		select seq_pack_id.Nextval from dual
+	</select>
+	<select id="getPickDetailSeq" resultType="Long">
+		select seq_pick_detail_id.Nextval from dual
+	</select>
+	<select id="getPickSeq" resultType="Long">
+		select seq_pick_id.Nextval from dual
+	</select>
+	<select id="getPickLocationSeq" resultType="Long">
+		select seq_pick_location_id.Nextval from dual
+	</select>
+	<select id="getPutawayDetailSeq" resultType="Long">
+		select seq_putaway_detail_id.Nextval from dual
+	</select>
+	<select id="getPutawaySeq" resultType="Long">
+		select seq_putaway_id.Nextval from dual
+	</select>
+	<select id="getPutawayLocationSeq" resultType="Long">
+		select seq_putaway_location_id.Nextval from dual
+	</select>
+	<select id="getRentSeq" resultType="Long">
+		select seq_rent_id.Nextval from dual
+	</select>
+	<select id="getRoleAuthSeq" resultType="Long">
+		select seq_role_auth_id.Nextval from dual
+	</select>
+	<select id="getRoleSeq" resultType="Long">
+		select seq_role_id.Nextval from dual
+	</select>
+	<select id="getSequenceSeq" resultType="Long">
+		select seq_sequence_id.Nextval from dual
+	</select>
+	<select id="getShiftDetailSeq" resultType="Long">
+		select seq_shift_detail_id.Nextval from dual
+	</select>
+	<select id="getShiftSeq" resultType="Long">
+		select seq_shift_id.Nextval from dual
+	</select>
+	<select id="getSkuSeq" resultType="Long">
+		select seq_sku_id.Nextval from dual
+	</select>
+	<select id="getSkuPackSeq" resultType="Long">
+		select seq_sku_pack_id.Nextval from dual
+	</select>
+	<select id="getSkuTypeSeq" resultType="Long">
+		select seq_sku_type_id.Nextval from dual
+	</select>
+	<select id="getSpecPackSeq" resultType="Long">
+		select seq_spec_pack_id.Nextval from dual
+	</select>
+	<select id="getStockSeq" resultType="Long">
+		select seq_stock_id.Nextval from dual
+	</select>
+	<select id="getStrategySeq" resultType="Long">
+		select seq_strategy_id.Nextval from dual
+	</select>
+	<select id="getStrategyImplSeq" resultType="Long">
+		select seq_strategy_impl_id.Nextval from dual
+	</select>
+	<select id="getSysParamSeq" resultType="Long">
+		select seq_sys_param_id.Nextval from dual
+	</select>
+	<select id="getTaskSeq" resultType="Long">
+		select seq_task_id.Nextval from dual
+	</select>
+	<select id="getUserSeq" resultType="Long">
+		select seq_user_id.Nextval from dual
+	</select>
+	<select id="getUserParamSeq" resultType="Long">
+		select seq_user_param_id.Nextval from dual
+	</select>
+	<select id="getWarehouseSeq" resultType="Long">
+		select seq_warehouse_id.Nextval from dual
+	</select>
+	<select id="getWarnSeq" resultType="Long">
+		select seq_warn_id.Nextval from dual
+	</select>
+	<select id="getWaveSeq" resultType="Long">
+		select seq_wave_id.Nextval from dual
+	</select>
+	<select id="getWorkAreaSeq" resultType="Long">
+		select seq_work_area_id.Nextval from dual
+	</select>
+	<select id="getWorkGroupSeq" resultType="Long">
+		select seq_work_group_id.Nextval from dual
+	</select>
+
+</mapper>

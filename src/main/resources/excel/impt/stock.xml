@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<excel>
+	<ignore ignoreRow="1" ></ignore>
+	<object alias="vo" class="com.yunkouan.wms.modules.inv.vo.InvStockVO"></object>
+	<!-- 库位 --><column obj="vo">locationName</column>
+	<!-- 货品编号 --><column obj="vo">skuNo</column>
+	<!-- 货品名称 --><column obj="vo">skuName</column>
+	<!-- 计量单位 --><column obj="vo">measureUnit</column>
+	<!-- 数量 --><column obj="vo.invStock">stockQty</column>
+	<!-- 货品状态 --><column obj="vo">skuStatusName</column>
+	<!-- 收货日期 --><column obj="vo.invStock" format="yyyy-MM-dd">inDate</column>
+	<!-- 批次 --><column obj="vo.invStock">batchNo</column>
+	<!-- 规格型号 --><column obj="vo">specModel</column>
+</excel>

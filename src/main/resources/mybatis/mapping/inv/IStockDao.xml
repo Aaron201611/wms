@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.inv.dao.IStockDao">
+	<cache type="com.yunkouan.cache.RedisCache4Mybatis">
+		<property name="eternal" value="true" />
+		<property name="maxEntriesLocalHeap" value="1000" />
+		<property name="maxEntriesLocalDisk" value="10000000" />
+		<property name="memoryStoreEvictionPolicy" value="LRU" />
+	</cache>
+
+	<sql id="table_name">
+		inv_stock
+	</sql>
+
+	<!-- 根据货品明细、批次数量和库位，查询货品库存列表 add by 王通 -->
+	<select id="findStockList" parameterType="InvStockVO"
+		resultType="InvStock" useCache="false">
+		SELECT
+		t1.stock_id,
+		t1.location_id,
+		t5.owner,
+		t1.sku_id,
+		t1.pack_id,
+		t1.batch_no,
+		t1.in_date,
+		t1.sku_status,
+		t1.org_id,
+		t1.warehouse_id,
+		t1.asn_id,
+		t1.asn_detail_id,
+		t1.is_block,
+		t1.create_person,
+		t1.create_time,
+		t1.update_person,
+		t1.update_time,
+		t1.pick_qty,
+		t1.measure_unit,
+		t1.stock_qty,
+		t1.stock_weight,
+		t1.stock_volume,
+		t1.produce_date,
+		t1.expired_date,
+		t1.att1,
+		t1.att2,
+		t1.att3,
+		t1.att4,
+		t1.att5
+		FROM
+		inv_stock t1, meta_location t2, meta_sku t5,meta_area t6
+		WHERE
+		t1.sku_id = t5.sku_id
+		AND t5.sku_status = 20
+		AND t1.location_id = t2.location_id
+		AND t2.location_status = 20
+		AND t2.area_id=t6.area_id
+		<if test="locationType != null and locationType != ''">
+			AND t6.area_type=#{locationType}
+		</if>
+		<if test="invStock.warehouseId != null and invStock.warehouseId != ''">
+			AND t1.warehouse_id = #{invStock.warehouseId}
+		</if>
+		<if test="invStock.orgId != null and invStock.orgId != ''">
+			AND t1.org_id = #{invStock.orgId}
+		</if>
+		<if test="invStock.skuId != null and invStock.skuId != ''">
+			AND t1.sku_id = #{invStock.skuId}
+		</if>
+		<if test="containBatch">
+			<if test="invStock.batchNo != null and invStock.batchNo != ''">
+				AND t1.batch_no = #{invStock.batchNo}
+			</if>
+			<if test="invStock.batchNo == null or invStock.batchNo == ''">
+				AND (t1.batch_no = '' OR t1.batch_no is null)
+			</if>
+		</if>
+		<if test="invStock.owner != null and invStock.owner != ''">
+			AND t1.owner = #{invStock.owner}
+		</if>
+		<if test="invStock.locationId != null and invStock.locationId != ''">
+			AND t1.location_id = #{invStock.locationId}
+		</if>
+		<if test="locationName != null and locationName != ''">
+			AND t2.location_name like #{locationName}
+		</if>
+		<if test="locationTypeList != null">
+			AND t2.location_type in
+			<foreach collection="locationTypeList" item="item" index="index"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="ownerName != null and ownerName != ''">
+			AND EXISTS
+			( SELECT 1
+			FROM meta_merchant t3
+			WHERE t5.owner = t3.merchant_id
+			AND t3.merchant_status = 20
+			AND t3.merchant_name like #{ownerName}
+			)
+		</if>
+		<if test="skuNo != null and skuNo != ''">
+			AND t5.sku_no like #{skuNo}
+		</if>
+		<if test="skuBarCode != null and skuBarCode != ''">
+			AND t5.sku_bar_code = #{skuBarCode}
+		</if>
+		<if test="locationNo != null and locationNo != ''">
+			AND t2.location_no = #{locationNo}
+		</if>
+		<if test="invStock.isBlock != null">
+			AND t1.is_block = #{invStock.isBlock}
+		</if>
+		<if test="invStock.skuStatus != null and invStock.skuStatus != ''">
+			AND t1.sku_status = #{invStock.skuStatus}
+		</if>
+		<if test="invStock.asnDetailId != null and invStock.asnDetailId != ''">
+			AND t1.asn_detail_id = #{invStock.asnDetailId}
+		</if>
+		<if test="invStock.asnId != null and invStock.asnId != ''">
+			AND t1.asn_id = #{invStock.asnId}
+		</if>
+		<if test="containTemp == null or containTemp == false">
+			AND t1.asn_id is null
+		</if>
+		<if test="onlyTemp != null and onlyTemp == true">
+			AND t1.asn_id is not null
+		</if>
+		<if test="skuIdList != null">
+			AND t1.sku_id in
+			<foreach collection="skuIdList" item="item" index="index"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="asnIdList != null">
+			AND t1.asn_id in
+			<foreach collection="asnIdList" item="item" index="index"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="batchNoList != null">
+			AND t1.batch_no in
+			<foreach collection="batchNoList" item="item" index="index"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="ownerList != null">
+			AND t5.owner in
+			<foreach collection="ownerList" item="item" index="index"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY ${resultOrder}
+	</select>
+
+	<!-- 根据盘点条件查询库存 add by 王通 -->
+	<select id="findStockByCount" parameterType="InvCountVO"
+		resultType="InvStock" useCache="false">
+		SELECT
+		t1.stock_id,
+		t1.location_id,
+		t4.owner,
+		t1.sku_id,
+		t1.pack_id,
+		t1.batch_no,
+		t1.in_date,
+		t1.sku_status,
+		t1.org_id,
+		t1.warehouse_id,
+		t1.asn_id,
+		t1.asn_detail_id,
+		t1.is_block,
+		t1.create_person,
+		t1.create_time,
+		t1.update_person,
+		t1.update_time,
+		t1.pick_qty,
+		t1.measure_unit,
+		t1.stock_qty,
+		t1.stock_weight,
+		t1.stock_volume,
+		t1.produce_date,
+		t1.expired_date,
+		t1.att1,
+		t1.att2,
+		t1.att3,
+		t1.att4,
+		t1.att5
+		FROM
+		inv_stock t1, meta_location t3, meta_sku t4
+		WHERE
+		t1.warehouse_id = #{invCount.warehouseId}
+		AND t1.org_id = #{invCount.orgId}
+		<if
+			test="invCount.countType == 2 and invCount.skuId != null and invCount.skuId != ''">
+			AND t1.sku_id = #{invCount.skuId}
+		</if>
+		<if
+			test="invCount.countType == 3 and invCount.locationId != null and invCount.locationId != ''">
+			AND t1.location_id = #{invCount.locationId}
+		</if>
+		<if test="invCount.owner != null and invCount.owner != ''">
+			AND t4.owner = #{invCount.owner}
+		</if>
+		<if test="invCount.countType == 4">
+			AND date(t1.update_time) = curdate()
+			<if test="invCount.shiftTimes != null and invCount.shiftTimes != 0">
+				AND EXISTS
+				( SELECT 1
+				FROM (SELECT * FROM (
+				SELECT COUNT(1) shift_times,location_id
+				FROM inv_log
+				WHERE DATE(create_time) = CURDATE()
+				GROUP BY location_id) t1 WHERE t1.shift_times &gt;=
+				#{invCount.shiftTimes}) t2
+				WHERE t1.location_id = t2.location_id
+				)
+			</if>
+		</if>
+		<if test="invCount.countType == 5">
+			AND t3.location_type = 70
+		</if>
+		<if test="invCount.countType != 5">
+			AND t3.location_type != 70
+		</if>
+		AND t1.location_id = t3.location_id
+		AND t1.sku_id = t4.sku_id
+		ORDER BY t3.location_no, t1.sku_id
+	</select>
+
+	<!-- 根据货主、单号、货品代码、批次、创建日期范围查找库存日志 add by 王通 -->
+	<select id="listLog" parameterType="InvLogVO" resultType="InvLog"
+		useCache="false">
+		SELECT
+		t1.log_id,
+		t1.op_person,
+		t1.note,
+		t1.op_type,
+		t1.invoice_bill,
+		t1.log_type,
+		t1.org_id,
+		t1.warehouse_id,
+		t1.location_id,
+		t1.batch_no,
+		t1.sku_id,
+		t1.sku_status,
+		t3.owner,
+		t1.qty,
+		t1.volume,
+		t1.weight,
+		t1.create_time,
+		t1.create_person,
+		t1.update_person,
+		t1.update_time
+		FROM
+		inv_log t1, meta_sku t3, sys_user t4, meta_location t5
+		WHERE
+		t1.org_id = #{invLog.orgId}
+		AND t1.sku_id = t3.sku_id
+		AND t1.create_person = t4.user_id
+		AND t1.location_id = t5.location_id
+		<if test="invLog.warehouseId != null and invLog.warehouseId != ''">
+			AND t1.warehouse_id = #{invLog.warehouseId}
+		</if>
+		<if test="invLog.batchNo != null and invLog.batchNo != ''">
+			AND t1.batch_no like #{invLog.batchNo}
+		</if>
+		<if test="ownerName != null and ownerName != ''">
+			AND EXISTS
+			( SELECT 1
+			FROM meta_merchant t2
+			WHERE t2.merchant_id = t3.owner
+			AND t3.sku_status = 20
+			AND t2.merchant_status = 20
+			AND t2.merchant_name like #{ownerName}
+			)
+		</if>
+		<if test="skuName != null and skuName != ''">
+			AND t3.sku_name like #{skuName}
+		</if>
+		<if test="locationName != null and locationName != ''">
+			AND t5.location_name like #{locationName}
+		</if>
+		<if test="skuNo != null and skuNo != ''">
+			AND t3.sku_no like #{skuNo}
+		</if>
+		<if test="invLog.invoiceBill != null and invLog.invoiceBill != ''">
+			AND t1.invoice_bill like #{invLog.invoiceBill}
+		</if>
+		<if test="invLog.skuStatus != null and invLog.skuStatus != ''">
+			AND t1.sku_status = #{invLog.skuStatus}
+		</if>
+		<if test="startDate != null">
+			AND t1.create_time &gt;= #{startDate,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endDate != null">
+			AND t1.create_time &lt;= #{endDate,jdbcType=TIMESTAMP}
+		</if>
+		<if test="createUserNo != null and createUserNo != ''">
+			AND t4.user_name = #{createUserNo}
+		</if>
+		<if test="invLog.logType != null and invLog.logType != ''">
+			AND t1.log_type = #{invLog.logType}
+		</if>
+		<if test="findAdjustment == 1">
+			AND t1.log_type in (5,7)
+		</if>
+		<if test="invLog.opType != null and invLog.opType != ''">
+			AND t1.op_type = #{invLog.opType}
+		</if>
+		ORDER BY t1.update_time DESC,t1.location_id,t1.sku_id,t1.batch_no
+	</select>
+
+	<!-- 获取当前全部货品批次库存数量 add by 王通 -->
+	<select id="selectStockSkuBatch" parameterType="InvStockVO"
+		resultType="InvStock" useCache="false">
+		SELECT t1.sku_id,t1.batch_no,t1.stock_qty FROM (SELECT
+		sku_id,batch_no,SUM(t1.stock_qty) stock_qty
+		FROM
+		inv_stock t1
+		WHERE
+		t1.warehouse_id = #{invStock.warehouseId}
+		AND t1.org_id = #{invStock.orgId}
+		AND
+		t1.is_block = #{invStock.isBlock}
+		<if test="invStock.batchNo != null and invStock.batchNo != ''">
+			AND t1.batch_no like #{invStock.batchNo}
+		</if>
+		GROUP BY t1.sku_id,t1.batch_no) t1,
+		meta_sku t2
+		LEFT JOIN meta_merchant t3 ON t2.owner = t3.merchant_id
+		AND t3.merchant_status = 20
+		WHERE t2.org_id = #{invStock.orgId}
+		AND t2.warehouse_id =
+		#{invStock.warehouseId}
+		AND t1.sku_id = t2.sku_id
+		<if test="skuNo != null and skuNo != ''">
+			AND t2.sku_no like #{skuNo}
+		</if>
+		<if test="skuName != null and skuName != ''">
+			AND t2.sku_name like #{skuName}
+		</if>
+		<if test="ownerName != null and ownerName != ''">
+			AND t3.merchant_name LIKE #{ownerName}
+		</if>
+		ORDER BY t2.sku_name
+	</select>
+
+	<!-- 获取当前全部货品库存数量 add by 王通 -->
+	<select id="selectWarnCountAll" parameterType="InvWarnVO"
+		resultType="InvWarnVO" useCache="false">
+		SELECT t3.merchant_name
+		owner,t2.sku_no,t2.sku_name,t2.spec_model,t2.measure_unit,
+		t2.min_safety_stock safe_stock_min,t2.max_safety_stock
+		safe_stock_max,t1.stock_qty FROM (SELECT sku_id,SUM(t1.stock_qty)
+		stock_qty
+		FROM
+		inv_stock t1
+		WHERE
+		t1.warehouse_id = #{warehouseId}
+		AND t1.org_id = #{orgId}
+		<if test="locationName != null and locationName != ''">
+			AND EXISTS
+			( SELECT 1
+			FROM meta_location t2
+			WHERE
+			t1.location_id = t2.location_id
+			AND t2.location_status = 20
+			AND t2.location_name like #{locationName}
+			)
+		</if>
+		<if test="skuStatus != null and skuStatus != ''">
+			AND t1.sku_status = #{skuStatus}
+		</if>
+		<if test="isFreeze != null and isFreeze != ''">
+			AND t1.is_block = #{isFreeze}
+		</if>
+		GROUP BY t1.sku_id) t1,
+		meta_sku t2
+		LEFT JOIN meta_merchant t3 ON t2.owner = t3.merchant_id
+		AND t3.merchant_status = 20
+		WHERE t2.org_id = #{orgId}
+		AND t2.warehouse_id = #{warehouseId}
+		AND t1.sku_id
+		= t2.sku_id
+		AND (t2.min_safety_stock IS NOT NULL OR t2.max_safety_stock
+		IS NOT NULL)
+		<if test="skuNo != null and skuNo != ''">
+			AND t2.sku_no like #{skuNo}
+		</if>
+		<if test="skuName != null and skuName != ''">
+			AND t2.sku_name like #{skuName}
+		</if>
+		<if test="owner != null and owner != ''">
+			AND t3.merchant_name LIKE #{owner}
+		</if>
+		ORDER BY t1.sku_name
+	</select>
+
+	<!-- 获取当前异常货品库存数量 add by 王通 -->
+	<select id="selectWarnCount" parameterType="InvWarnVO"
+		resultType="InvWarnVO" useCache="false">
+		SELECT * FROM (
+		SELECT t3.merchant_name
+		owner,t2.sku_no,t2.sku_name,t2.spec_model,t2.measure_unit,
+		t2.min_safety_stock safe_stock_min,t2.max_safety_stock
+		safe_stock_max,t1.stock_qty FROM (SELECT sku_id,SUM(t1.stock_qty)
+		stock_qty
+		FROM
+		inv_stock t1
+		WHERE
+		t1.warehouse_id = #{warehouseId}
+		AND t1.org_id = #{orgId}
+		<if test="locationName != null and locationName != ''">
+			AND EXISTS
+			( SELECT 1
+			FROM meta_location t2
+			WHERE
+			t1.location_id = t2.location_id
+			AND t2.location_status = 20
+			AND t2.location_name like #{locationName}
+			)
+		</if>
+		<if test="skuStatus != null and skuStatus != ''">
+			AND t1.sku_status = #{skuStatus}
+		</if>
+		<if test="isFreeze != null and isFreeze != ''">
+			AND t1.is_block = #{isFreeze}
+		</if>
+		GROUP BY t1.sku_id) t1,
+		meta_sku t2
+		LEFT JOIN meta_merchant t3 ON t2.owner = t3.merchant_id
+		AND t3.merchant_status = 20
+		WHERE t2.org_id = #{orgId}
+		AND t2.warehouse_id = #{warehouseId}
+		AND t1.sku_id
+		= t2.sku_id
+		AND (t2.min_safety_stock IS NOT NULL OR t2.max_safety_stock
+		IS NOT NULL)
+		<if test="skuNo != null and skuNo != ''">
+			AND t2.sku_no like #{skuNo}
+		</if>
+		<if test="skuName != null and skuName != ''">
+			AND t2.sku_name like #{skuName}
+		</if>
+		<if test="owner != null and owner != ''">
+			AND t3.merchant_name LIKE #{owner}
+		</if>
+		) t1
+		WHERE t1.stock_qty &gt; t1.safe_stock_max
+		OR t1.stock_qty &lt; t1.safe_stock_min
+		ORDER BY t1.sku_name
+	</select>
+
+	<!-- 获取当前异常货品库存数量 add by 王通 -->
+	<select id="selectWarnFromSku" parameterType="InvWarnVO"
+		resultType="InvWarnVO" useCache="false">
+		SELECT * FROM (
+		SELECT
+		t3.merchant_name owner,
+		t3.merchant_short_name,
+		t1.sku_no,
+		t1.sku_name,
+		t1.spec_model,
+		t1.measure_unit,
+		t1.min_safety_stock safe_stock_min,
+		t1.max_safety_stock safe_stock_max,
+		t1.warehouse_id,
+		t1.org_id,
+		IFNULL(t2.stock_qty,0) stock_qty
+		FROM
+		meta_sku t1
+		LEFT JOIN
+		(SELECT
+		sku_id,
+		SUM(t1.stock_qty) stock_qty
+		FROM
+		inv_stock t1
+		WHERE t1.org_id = #{orgId}
+		<if test="warehouseId != null and warehouseId != ''">
+			AND t1.warehouse_id = #{warehouseId}
+		</if>
+		<if test="locationName != null and locationName != ''">
+			AND EXISTS
+			( SELECT 1
+			FROM meta_location t2
+			WHERE
+			t1.location_id = t2.location_id
+			AND t2.location_status = 20
+			AND t2.location_name like #{locationName}
+			)
+		</if>
+		<if test="skuStatus != null and skuStatus != ''">
+			AND t1.sku_status = #{skuStatus}
+		</if>
+		<if test="isFreeze != null and isFreeze != ''">
+			AND t1.is_block = #{isFreeze}
+		</if>
+		GROUP BY t1.sku_id) t2
+		ON t1.sku_id = t2.sku_id
+		LEFT JOIN meta_merchant t3
+		ON t1.owner = t3.merchant_id) t1
+		WHERE (t1.stock_qty &gt; t1.safe_stock_max OR t1.stock_qty &lt;
+		t1.safe_stock_min)
+		AND (t1.safe_stock_min IS NOT NULL OR t1.safe_stock_max IS NOT NULL)
+		AND t1.org_id = #{orgId}
+		<if test="warehouseId != null and warehouseId != ''">
+			AND t1.warehouse_id = #{warehouseId}
+		</if>
+
+		<if test="skuNo != null and skuNo != ''">
+			AND t1.sku_no like #{skuNo}
+		</if>
+		<if test="skuName != null and skuName != ''">
+			AND t1.sku_name like #{skuName}
+		</if>
+		<if test="owner != null and owner != ''">
+			AND t3.merchant_name LIKE #{owner}
+		</if>
+		ORDER BY t1.sku_name
+	</select>
+
+	<select id="selectInStock" parameterType="InStockVO" resultType="InStockVO"
+		useCache="false">
+		SELECT
+		t6.location_no,
+		t4.sku_name,
+		t4.sku_bar_code,
+		t4.sku_no,
+		t1.po_no,
+		t1.order_date,
+		t2.order_qty,
+		t2.receive_qty,
+		t5.merchant_short_name OWNER,
+		t3.merchant_short_name sender,
+		t1.contact_phone contact_way,
+		t1.op_time in_stock_date,
+		t2.produce_date
+		FROM
+		rec_asn t1
+		LEFT JOIN rec_asn_detail t2
+		ON t1.asn_id = t2.asn_id
+		LEFT JOIN meta_merchant t3
+		ON t1.`sender` = t3.`merchant_id`
+		LEFT JOIN meta_sku t4
+		ON t2.sku_id = t4.`sku_id`
+		LEFT JOIN meta_merchant t5
+		ON t4.`owner` = t5.`merchant_id`
+		LEFT JOIN meta_location t6
+		ON t2.`location_id` = t6.`location_id`
+		WHERE t1.asn_status &gt;= 60
+		AND t1.asn_status != 99
+		AND t1.org_id = #{orgId}
+		AND t1.warehouse_id = #{warehouseId}
+		<if test="locationNoLike != null and locationNoLike != ''">
+			AND t6.location_no LIKE #{locationNoLike}
+		</if>
+		<if test="skuNameLike != null and skuNameLike != ''">
+			AND t4.sku_name LIKE #{skuNameLike}
+		</if>
+		<if test="skuBarCodeLike != null and skuBarCodeLike != ''">
+			AND t4.sku_bar_code LIKE #{skuBarCodeLike}
+		</if>
+		<if test="skuNoLike != null and skuNoLike != ''">
+			AND t4.sku_no LIKE #{skuNoLike}
+		</if>
+		<if test="poNoLike != null and poNoLike != ''">
+			AND t1.po_no LIKE #{poNoLike}
+		</if>
+		<if test="orderDateStart != null">
+			AND t1.order_date &gt;= #{orderDateStart}
+		</if>
+		<if test="orderDateEnd != null">
+			AND t1.order_date &lt;= #{orderDateEnd}
+		</if>
+		<if test="inDateStart != null">
+			AND t1.op_time &gt;= #{inDateStart}
+		</if>
+		<if test="inDateEnd != null">
+			AND t1.op_time &lt;= #{inDateEnd}
+		</if>
+		<if test="ownerLike != null and ownerLike != ''">
+			AND t5.`merchant_short_name` LIKE #{ownerLike}
+		</if>
+		ORDER BY t1.create_time DESC,
+		t1.po_no,
+		t1.asn_id,
+		t4.sku_name
+	</select>
+
+	<select id="selectTotalInStock" parameterType="InStockVO"
+		resultType="com.yunkouan.wms.modules.send.vo.TotalVo" useCache="false">
+		SELECT count(t4.sku_id) total1, sum(t2.order_qty) total2,
+		sum(t2.receive_qty) total3
+		FROM
+		rec_asn t1
+		LEFT JOIN rec_asn_detail t2
+		ON t1.asn_id = t2.asn_id
+		LEFT JOIN meta_merchant t3
+		ON t1.`sender` = t3.`merchant_id`
+		LEFT JOIN meta_sku t4
+		ON t2.sku_id = t4.`sku_id`
+		LEFT JOIN meta_merchant t5
+		ON t4.`owner` = t5.`merchant_id`
+		LEFT JOIN meta_location t6
+		ON t2.`location_id` = t6.`location_id`
+		WHERE t1.asn_status &gt;= 60
+		AND t1.asn_status != 99
+		AND t1.org_id = #{orgId}
+		AND t1.warehouse_id = #{warehouseId}
+		<if test="locationNoLike != null and locationNoLike != ''">
+			AND t6.location_no LIKE #{locationNoLike}
+		</if>
+		<if test="skuNameLike != null and skuNameLike != ''">
+			AND t4.sku_name LIKE #{skuNameLike}
+		</if>
+		<if test="skuBarCodeLike != null and skuBarCodeLike != ''">
+			AND t4.sku_bar_code LIKE #{skuBarCodeLike}
+		</if>
+		<if test="skuNoLike != null and skuNoLike != ''">
+			AND t4.sku_no LIKE #{skuNoLike}
+		</if>
+		<if test="poNoLike != null and poNoLike != ''">
+			AND t1.po_no LIKE #{poNoLike}
+		</if>
+		<if test="orderDateStart != null">
+			AND t1.order_date &gt;= #{orderDateStart}
+		</if>
+		<if test="orderDateEnd != null">
+			AND t1.order_date &lt;= #{orderDateEnd}
+		</if>
+		<if test="ownerLike != null and ownerLike != ''">
+			AND t5.`merchant_short_name` LIKE #{ownerLike}
+		</if>
+	</select>
+</mapper>

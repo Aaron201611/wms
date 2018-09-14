@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://code.alibabatech.com/schema/dubbo
+		http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd">
+
+	<description>Shiro Configuration</description>
+
+	<!--
+ 	<dubbo:protocol name="dubbo" port="8888" />
+	<dubbo:application name="annotation-consumer" />
+	<dubbo:registry address="zookeeper://127.0.0.1:2181" />
+	<dubbo:annotation package="com.yunkouan.wms" />
+
+	<dubbo:reference timeout="3000" retries="1" id="adminService" interface="com.yunkouan.saas.modules.sys.service.IAdminService" />
+	<dubbo:reference timeout="3000" retries="1" id="authService" interface="com.yunkouan.saas.modules.sys.service.IAuthService" />
+	<dubbo:reference timeout="3000" retries="1" id="orgService" interface="com.yunkouan.saas.modules.sys.service.IOrgService" />
+	<dubbo:reference timeout="3000" retries="1" id="userService" interface="com.yunkouan.saas.modules.sys.service.IUserService" />
+	<dubbo:reference timeout="3000" retries="1" id="logService" interface="com.yunkouan.saas.modules.sys.service.ILogService" />
+	<dubbo:reference timeout="3000" retries="1" id="strategyService" interface="com.yunkouan.saas.modules.sys.service.IStrategyService" />
+	-->
+
+    <!-- Shiro主过滤器 -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+    	<!-- Shiro的核心安全接口 -->
+        <property name="securityManager" ref="securityManager" />
+        <!-- 登录页面地址，非必须的属性，默认会自动寻找Web工程根目录下的"/login.jsp"页面 -->
+        <property name="loginUrl" value="${adminPath}/adminlogin/toLogin" />
+        <!--  登录成功后要跳转的连接 -->
+		<property name="successUrl" value="${adminPath}/adminlogin/success" />
+		<property name="unauthorizedUrl" value="${adminPath}/adminlogin/toLogin" />
+        <property name="filters">
+            <map>
+                <!-- 一般需要定制 com.yunkouan.wms.common.shiro.ExtendFormAuthenticationFilter -->
+                <entry key="authc" value-ref="extendFormAuthenticationFilter"/>
+            </map>
+        </property>
+        <!-- shiro连接约束配置,在这里使用自定义的动态获取资源类  一般需要定制  -->
+		<property name="filterChainDefinitionMap" ref="chainDefinitionSectionMetaSource" />
+    </bean>
+
+	<!-- 定义Shiro安全管理配置 -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<!-- 一般需要定制 com.yunkouan.wms.common.shiro.SystemAuthorizingRealm -->
+		<property name="realm" ref="systemAuthorizingRealm" />
+		<property name="sessionManager" ref="sessionManager" />
+		<!-- <property name="cacheManager" ref="shiroCacheManager" /> -->
+	</bean>
+
+	<!-- 本地内存缓存 -->
+	<!--
+	<bean id="sessionDAO" class="org.apache.shiro.session.mgt.eis.MemorySessionDAO"/>
+	-->
+	<!-- Redis缓存 -->
+    <bean id="sessionDAO" class="com.yunkouan.cache.RedisCache4Shiro" >
+        <property name="jedisConnectionFactory" ref="jedisConnectionFactory"></property>
+    </bean>
+
+	<bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+		<property name="sessionDAO" ref="sessionDAO"/>
+        <!-- session的失效时长，单位毫秒 -->
+        <property name="globalSessionTimeout" value="86400000"/>
+        <!-- 删除失效的session -->
+        <property name="deleteInvalidSessions" value="true"/>
+    </bean>
+
+	<!-- 定义哪些URL地址需要进行权限认证 -->
+	<!--
+		scope="prototype"
+		anon不需要权限认证
+		authc需要进行权限认证
+		${adminPath}/bill/search = bill:search
+		${adminPath}/** = authc
+	-->
+    <bean id="chainDefinitionSectionMetaSource" class="com.yunkouan.wms.common.shiro.ChainDefinitionSectionMetaSource">
+    	<property name="basePath" value="${adminPath}" />
+	    <property name="filterChainDefinitions">
+	        <value>
+	        	/index.html=anon
+	        	/static/css/**=anon
+	        	/static/dist/**=anon
+	        	/static/fonts/**=anon
+	        	/static/img/**=anon
+	        	/static/js/app.*=anon
+	        	/static/js/chunks/login-*=anon
+	        	${adminPath}/adminlogin/toLogin=anon
+	        	${adminPath}/adminlogin/logout=anon
+	        	${adminPath}/adminlogin/doLogin=anon
+	        	${adminPath}/adminlogin/phoneLogout=anon
+	        	${adminPath}/adminlogin/login=anon
+	        	${adminPath}/adminlogin/isTimeout=anon
+	        	${adminPath}/adminlogin/isPermitted=authc
+	        	${adminPath}/wrh/list=authc
+	        	${adminPath}/pack/list=authc
+	        	${adminPath}/skuType/list=authc
+	        	${adminPath}/org/list=authc
+	        	${adminPath}/stock/list=authc
+	        	${adminPath}/merchant/list=authc
+	        	${adminPath}/sku/list=authc
+	        	${adminPath}/user/list=authc
+	        	${adminPath}/external/receiveResult=anon
+	        	${adminPath}/param/show=anon
+	        </value>
+	    </property>
+	</bean>
+
+	<!-- 自定义会话管理配置 -->
+	<!--
+	<bean id="sessionManager" class="com.yunkouan.security.session.SessionManager">
+		<property name="sessionDAO" ref="sessionDAO"/>
+		<property name="globalSessionTimeout" value="${session.sessionTimeout}"/>
+		<property name="sessionValidationInterval" value="${session.sessionTimeoutClean}"/>
+ 		<property name="sessionValidationSchedulerEnabled" value="true"/>
+		<property name="sessionIdCookie" ref="sessionIdCookie"/>
+		<property name="sessionIdCookieEnabled" value="true"/>
+	</bean>
+	-->
+	<!-- 指定本系统SESSIONID, 默认为: JSESSIONID 问题: 与SERVLET容器名冲突, 如JETTY, TOMCAT 等默认JSESSIONID,
+		当跳出SHIRO SERVLET时如ERROR-PAGE容器会为JSESSIONID重新分配值导致登录会话丢失! -->
+	<!--
+	<bean id="sessionIdCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+	    <constructor-arg name="name" value="yunkouan.session.id"/>
+	</bean>
+	-->
+	<!-- 自定义Session存储容器 -->
+	<!--
+	<bean id="sessionDAO" class="com.yunkouan.security.session.CacheSessionDAO">
+		<property name="sessionIdGenerator" ref="idGen" />
+		<property name="activeSessionsCacheName" value="activeSessionsCache" />
+		<property name="cacheManager" ref="shiroCacheManager" />
+	</bean>
+	-->
+	<!-- 定义登录用户权限的缓存管理器 -->
+	<!--
+	<bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManager" ref="cacheManager"/>
+	</bean>
+	-->
+
+	<!-- 会自动的调用和Spring整合后各个组件的生命周期方法 -->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+	<!-- 开启Shiro的注解(如@RequiresRoles，@RequiresPermissions)，需借助SpringAOP扫描使用Shiro注解的类 -->
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor">
+		<property name="proxyTargetClass" value="true" />
+	</bean>
+	<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+    	<property name="securityManager" ref="securityManager"/>
+	</bean>
+</beans>

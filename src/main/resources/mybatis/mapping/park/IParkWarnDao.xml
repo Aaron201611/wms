@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.park.dao.IParkWarnDao">
+	<!-- 查询发货单列表 -->
+	<select id="qryList"  parameterType="java.util.Map" resultType="com.yunkouan.wms.modules.park.entity.ParkWarn">
+		select * 
+		 from park_warn	 
+		 <where>
+		    <if test="rentList !=null">
+		        rent_id in
+		       <foreach item="item" index="index" collection="rentList" open="(" separator="," close=")">  
+			 		#{item}  
+		 		</foreach>
+		 	</if>	   
+		 </where>
+		   order by update_time desc		   
+	</select>
+
+	
+</mapper>

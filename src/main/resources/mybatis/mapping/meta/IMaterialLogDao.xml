@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.meta.dao.IMaterialLogDao">
+
+	<select id="list" parameterType="MaterialLogVo" resultType="MetaMaterialLog">
+		select t1.*
+		from meta_material_log t1 left join meta_material t2
+		on t2.material_id = t1.material_id
+		where t1.org_id = #{materialLog.orgId}
+		<if test="materialLog.warehouseId != null and materialLog.warehouseId != ''">
+			and t1.warehouse_id = #{materialLog.warehouseId}
+		</if>
+		<if test="materialNameLike != null and materialNameLike != ''">
+			and t2.material_name like #{materialNameLike}
+		</if>
+		<if test="materialNoLike != null and materialNoLike != ''">
+			and t2.material_no like #{materialNoLike}
+		</if>
+		<if test="involveBillLike != null and involveBillLike != ''">
+			and t1.involve_bill like #{involveBillLike}
+		</if>
+		<if test="startDate != null">
+			and t1.create_time &gt;= #{startDate}
+		</if>
+		<if test="endDate != null">
+			and t1.create_time &lt;= #{endDate}
+		</if>
+		order by t1.create_time desc
+	</select>
+
+</mapper>

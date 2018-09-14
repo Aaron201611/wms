@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.inv.dao.IAdjustDao">
+	<sql id="table_name">
+		inv_adjust
+	</sql>
+	<sql id="common_where">
+		 warehouse_id = #{invAdjust.warehouseId}
+		 AND org_id = #{invAdjust.orgId}
+	</sql>
+	
+	<!-- 页面 - 查询调账单列表 add by 王通 -->
+	<select id="listByPage" parameterType="InvAdjustVO" resultType="InvAdjust">
+		SELECT 
+			t1.adjust_id, t1.adjust_no, t1.count_id, t1.adjust_status, 
+			t1.create_person, t1.create_time, t1.owner, t1.org_id, 
+			t1.warehouse_id, t1.update_person, t1.update_time, 
+			t1.adjust_id2, t1.data_from
+		FROM 
+			inv_adjust t1
+		<where>
+			t1.warehouse_id = #{invAdjust.warehouseId}
+		 	AND t1.org_id = #{invAdjust.orgId}
+			<if test="invAdjust.adjustNo != null and invAdjust.adjustNo !=''">
+				AND t1.adjust_no like #{invAdjust.adjustNo}
+			</if>
+			<if test="countNo != null">
+				AND EXISTS 
+				(	SELECT 1 
+					FROM inv_count t2
+					WHERE 
+						t1.count_id = t2.count_id 
+						AND t2.count_status = 40 
+						AND t2.count_no like #{countNo} 
+				)
+			</if>
+			<if test="invAdjust.adjustStatus != null">
+				AND t1.adjust_status = #{invAdjust.adjustStatus}
+			</if>
+		</where>
+		ORDER BY t1.CREATE_TIME DESC
+	</select>
+	
+	<select id="getTask" parameterType="String" resultType="String">
+		select
+		warehouse_id from inv_adjust where adjust_status=10 and org_id=#{orgId}
+	</select>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.send.dao.IDeliveryDetailDao">
+	<!-- 根据发货单id删除发货明细 -->
+	<delete id="delByDeliveryId"  parameterType="java.util.Map" >
+		delete
+		from send_delivery_detail
+		where delivery_id = #{deliveryId}
+		  and org_id = #{orgId}
+		  and warehouse_id = #{warehouseId}
+	</delete>
+	
+	<!-- 根据发货id查询发货明细列表 -->
+	<select id = "selectByDeliveryId" parameterType="java.util.Map" resultType="com.yunkouan.wms.modules.send.entity.SendDeliveryDetail">
+		select * 
+		from send_delivery_detail
+		where delivery_id = #{deliveryId}
+		order by update_time desc
+	</select>
+
+
+	
+</mapper>

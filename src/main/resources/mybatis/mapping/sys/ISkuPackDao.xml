@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.meta.dao.ISkuPackDao">
+	<cache type="com.yunkouan.cache.RedisCache4Mybatis">
+		<property name="eternal" value="true"/>
+	    <property name="maxEntriesLocalHeap" value="1000"/>
+	    <property name="maxEntriesLocalDisk" value="10000000"/>
+	    <property name="memoryStoreEvictionPolicy" value="LRU"/>
+	</cache>
+
+	<select id="list" parameterType="MetaSkuPack" resultType="MetaPack" useCache="false">
+		select p.*, s.pack_percent
+		from meta_sku_pack s, meta_pack p
+		where p.pack_id = s.pack_id
+		and s.sku_id = #{skuId}
+		order by p.pack_id2 desc
+	</select>
+
+    <delete id="delete" parameterType="MetaSkuPack" >
+    	delete from meta_sku_pack
+    	where sku_id = #{skuId}
+	</delete>
+
+</mapper>

@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://code.alibabatech.com/schema/dubbo
+		http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd">
+
+    <description>Spring MVC Configuration</description>
+
+    <!-- 引入配置文件 -->
+	<context:property-placeholder location="classpath*:prop/*.properties" ignore-unresolvable="true" />
+	<aop:aspectj-autoproxy proxy-target-class="true"/>
+	<context:component-scan base-package="com.**.controller" />
+	<bean id="httpClientUtils" class="com.yunkouan.wms.modules.send.util.HttpClientUtils"/>
+	<bean id="interfaceLogAspect" class="com.yunkouan.wms.modules.sys.aop.InterfaceLogAspect"/>
+	<bean id="issFileUtil" class="com.yunkouan.wms.modules.message.util.IssFileUtil"/>
+
+    <bean id="redisConfig" class="com.yunkouan.wms.common.config.RedisConfig">
+        <property name="host" value="${redis.host}" />
+        <property name="port" value="${redis.port}" />
+        <property name="password" value="${redis.pass}" />
+        <property name="db" value="${redis.default.db}"></property>
+
+	    <property name="maxIdle" value="${redis.maxIdle}" />
+	    <property name="maxActive" value="${redis.maxActive}" />
+	    <property name="maxWait" value="${redis.maxWait}" />
+	    <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+	    <property name="timeout" value="${redis.timeout}" />
+    </bean>
+
+    <!-- Spring上下文对象 add by andy  -->
+    <bean class="com.yunkouan.util.SpringContextHolder"></bean>
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">	
+         <property name="basenames">  
+	         <list>  
+	         	<value>classpath:message/valid</value>
+				<value>classpath:message/message</value>
+	         </list>  
+         </property>  
+         <!-- useCodeAsDefaultMessage一定要配成false，否则获取不到{min} 和 {max} -->
+         <property name="useCodeAsDefaultMessage" value="false" /> 
+         <property name="cacheSeconds" value="0"/> 
+         <property name="defaultEncoding" value="UTF-8"/>  
+	</bean>
+
+	<!-- 验证器 -->
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+    	<property name="providerClass" value="org.hibernate.validator.HibernateValidator" />
+        <property name="validationMessageSource" ref="messageSource"/>
+	</bean>
+
+	<mvc:annotation-driven validator="validator">
+		<mvc:message-converters>
+			<ref bean="byteConverter"/>
+			<ref bean="stringHttpMessageConverter" />
+			<ref bean="mappingJackson2HttpMessageConverter" />
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+
+	<!-- 下载Excel add by andy wang -->
+	<bean id="byteConverter" class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
+
+	<bean id="stringHttpMessageConverter"
+		class="org.springframework.http.converter.StringHttpMessageConverter" >
+	</bean>
+
+	<!-- XML转换器 -->
+	<!--
+	<bean id="marshallingHttpMessageConverter"
+		class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+		<property name="marshaller" ref="castorMarshaller" />
+		<property name="unmarshaller" ref="castorMarshaller" />
+	</bean>
+	<bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller" />
+	-->
+
+	<!-- JSON转换器 -->
+	<bean id="mappingJackson2HttpMessageConverter"
+		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>application/json;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+	<!-- 多部分文件上传 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	     <property name="maxUploadSize" value="104857600" />
+	     <property name="maxInMemorySize" value="4096" />
+	     <property name="defaultEncoding" value="UTF-8"></property>
+	</bean> 
+	
+
+	<!-- 动态资源解析器 -->
+	<!--
+	<bean id="contentNegotiationManagerFactoryBean"
+		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<property name="defaultContentType" value="text/html" />
+		<property name="ignoreAcceptHeader" value="true" />
+		<property name="favorPathExtension" value="true" />
+		<property name="favorParameter" value="false" />
+		<property name="mediaTypes">
+			<map>
+				<entry key="atom" value="application/atom+xml;charset=UTF-8" />
+				<entry key="html" value="text/html;charset=UTF-8" />
+				<entry key="json" value="application/json;charset=UTF-8" />
+			</map>
+		</property>
+	</bean>
+	<bean
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="contentNegotiationManager">
+			<bean
+				class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+				<property name="defaultContentType" value="text/html" />
+				<property name="mediaTypes">
+					<map>
+						<entry key="json" value="application/json;charset=UTF-8" />
+						<entry key="xml" value="application/xml;charset=UTF-8" />
+						<entry key="html" value="text/html;charset=UTF-8" />
+					</map>
+				</property>
+			</bean>
+		</property>
+		<property name="viewResolvers">
+			<list>
+				<bean
+					class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+					<property name="prefix" value="${web.view.prefix}" />
+					<property name="suffix" value="${web.view.suffix}" />
+				</bean>
+			</list>
+		</property>
+		<property name="defaultViews">
+			<list>
+				<bean
+					class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+				<bean class="org.springframework.web.servlet.view.xml.MarshallingView">
+					<property name="marshaller" ref="castorMarshaller" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+	-->
+	
+	<!-- 对静态资源文件的访问， 将无法mapping到Controller的path交给default servlet handler处理 -->
+	<mvc:default-servlet-handler />
+
+
+
+	<!-- job的配置开始 -->  
+   <bean id="receiveJob"  
+       class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+       <property name="targetObject">  
+           <ref bean="receiveChkResultjob" />  
+       </property>  
+       <property name="targetMethod">  
+           <value>execute</value>  
+       </property>  
+   </bean>  
+   
+   <bean id="sendDataJob"  
+       class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+       <property name="targetObject">  
+           <ref bean="sendInAndOutStockDataJob" />  
+       </property>  
+       <property name="targetMethod">  
+           <value>execute</value>  
+       </property>  
+   </bean>  
+   <!-- job的配置结束 -->
+   
+   <!-- 调度的配置开始 -->  
+   <bean id="crontestJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+       <property name="jobDetail">  
+           <ref bean="receiveJob" />  
+       </property>  
+       <property name="cronExpression">  
+           <value>1 0/1 * * * ?</value>  <!-- Cron表达式“10 */1 * * * ?”意为：从10秒开始，每1分钟执行一次。  -->  
+       </property>  
+   </bean> 
+   
+   <!-- 定时发送出入库数据 -->
+   <bean id="crontestJobTrigger2" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+       <property name="jobDetail">  
+           <ref bean="sendDataJob" />  
+       </property>  
+       <property name="cronExpression">  
+           <value>0 5 0 * * ?</value>  <!-- Cron表达式“0 5 0 * * ?”意为：每天0点5分执行。  -->  
+       </property>  
+   </bean> 
+   <!-- 调度的配置结束 -->
+   
+  <!-- 启动触发器的配置开始 -->
+   <bean name="startQuertz" lazy-init="false" autowire="no"  
+       class="org.springframework.scheduling.quartz.SchedulerFactoryBean">  
+       <property name="triggers">  
+           <list>  
+           		<!-- <ref bean="crontestJobTrigger2" /> 
+                <ref bean="crontestJobTrigger" />  -->
+           </list>  
+       </property>  
+   </bean>
+   <!-- 启动触发器的配置结束 -->
+
+	<!-- 【哈尔滨】分布式定时任务调度begin -->
+   <bean id="jobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+       <property name="jobClass" value="com.yunkouan.wms.common.quartz.AssisJob"/>
+       <property name="group" value="group1"/>
+       <property name="name" value="jobDetail"/>
+       <property name="durability" value="true"/>
+   </bean>
+   <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="jobDetail" />
+        <property name="cronExpression" value="0/60 * * ? * *" />
+   </bean>
+   <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">  
+       <property name="dataSource" ref="dataSource" />
+       <property name="autoStartup" value="true" />
+       <property name="applicationContextSchedulerContextKey" value="applicationContext" />
+       <property name="startupDelay" value="60" />
+       <property name="overwriteExistingJobs" value="true" />
+       <property name="configLocation" value="classpath:prop/quartz.properties" />
+       <property name="triggers">  
+           <list>  
+                <ref bean="cronTrigger" />
+                <ref bean="cronTrigger4InvLog" /> 
+                <ref bean="cronTrigger4Stock" /> 
+                <!-- <ref bean="cronTrigger4IssMessage" />  -->
+           </list>  
+       </property>  
+   </bean>  
+   <!-- 【哈尔滨】分布式定时任务调度end -->
+
+	<!-- 【库存日志备份】分布式定时任务调度begin -->
+   <bean id="jobDetail4InvLog" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+       <property name="jobClass" value="com.yunkouan.wms.modules.intf.timer.InvLogBackupTask"/>
+       <property name="group" value="group1"/>
+       <property name="name" value="jobDetail4InvLog"/>
+       <property name="durability" value="true"/>
+   </bean>
+   <bean id="cronTrigger4InvLog" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="jobDetail4InvLog" />
+        <property name="cronExpression" value="0 0 4 * * ?" /> <!-- [秒] [分] [小时] [日] [月] [周] [年] -->
+   </bean>
+	<!-- 【库存日志备份】分布式定时任务调度end -->
+
+	<!-- 【芜湖华东库存同步】分布式定时任务调度begin -->
+   <bean id="jobDetail4Stock" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+       <property name="jobClass" value="com.yunkouan.wms.modules.intf.timer.QueryStockTask"/>
+       <property name="group" value="group1"/>
+       <property name="name" value="jobDetail4Stock"/>
+       <property name="durability" value="true"/>
+   </bean>
+   <bean id="cronTrigger4Stock" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="jobDetail4Stock" />
+        <property name="cronExpression" value="0 0 1 * * ?" /> <!-- [秒] [分] [小时] [日] [月] [周] [年] -->
+   </bean>
+	<!-- 【芜湖华东库存同步】分布式定时任务调度end -->
+	
+	<!-- 【查验线文件读取】分布式定时任务调度begin -->
+   <!-- <bean id="jobReceiveIssMessage" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+       <property name="jobClass" value="com.yunkouan.wms.common.quartz.ReceiveIssMessageJob"/>
+       <property name="group" value="group1"/>
+       <property name="name" value="jobReceiveIssMessage"/>
+       <property name="durability" value="true"/>
+   </bean>
+   <bean id="cronTrigger4IssMessage" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="jobReceiveIssMessage" />
+        <property name="cronExpression" value="0/30 * * ? * *" /> [秒] [分] [小时] [日] [月] [周] [年]
+   </bean> -->
+	<!-- 【库存日志备份】分布式定时任务调度end -->
+
+</beans>

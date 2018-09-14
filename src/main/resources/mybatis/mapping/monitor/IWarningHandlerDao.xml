@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.monitor.dao.IWarningHandlerDao">
+	<sql id="table_name">
+		warning_handler
+	</sql>
+
+	<!-- 获取当前全部货品批次到达预警日期的库存货品 add by 王通 -->
+	<select id="findShelflifeList" parameterType="ShelflifeWarningVO"
+		resultType="ShelflifeWarningVO">
+		SELECT t1.sku_id,
+		t3.merchant_short_name OWNER,
+		t2.sku_no,
+		t2.sku_name,
+		t1.batch_no,
+		t2.spec_model,
+		t2.measure_unit,
+		DATE_ADD(t1.produce_date, INTERVAL t2.shelflife DAY) expire_date,
+		DATE_ADD(t1.produce_date,
+		INTERVAL (t2.shelflife - t2.overdue_warning_days) DAY) warning_date,
+		t1.stock_count,
+		t1.warehouse_id,
+		t4.warning_handler_id
+		FROM (SELECT t1.sku_id,
+		t1.batch_no,
+		t1.produce_date,
+		t1.org_id,
+		t1.warehouse_id,
+		SUM(t1.stock_qty) stock_count
+		FROM inv_stock t1
+		GROUP BY
+		t1.sku_id, t1.batch_no, t1.produce_date, t1.org_id, t1.warehouse_id)
+		t1
+		LEFT JOIN warning_handler t4
+		ON t1.batch_no = t4.batch_no AND
+		t1.sku_id = t4.sku_id,
+		meta_sku t2,
+		meta_merchant t3
+		WHERE t1.sku_id =
+		t2.sku_id
+		AND t2.owner = t3.merchant_id
+		AND DATE_ADD(t1.produce_date,
+		INTERVAL (t2.shelflife - t2.overdue_warning_days) DAY) &lt; CURRENT_TIME
+		AND
+		t1.org_id = #{orgId}
+		<if test="warehouseId != null and warehouseId != ''">
+			AND t1.warehouse_id = #{warehouseId}
+		</if>
+
+		<if test="batchNoLike != null and batchNoLike != ''">
+			AND t1.batch_no LIKE #{batchNoLike}
+		</if>
+		<if test="ownerLike != null and ownerLike != ''">
+			AND t3.merchant_short_name LIKE #{ownerLike}
+		</if>
+		<if test="skuNoLike != null and skuNoLike != ''">
+			AND t2.sku_no LIKE #{skuNoLike}
+		</if>
+		<if test="handleStatus == 1">
+			AND t4.warning_handler_id IS NULL
+		</if>
+		<if test="handleStatus == 2">
+			AND t4.warning_handler_id IS NOT NULL
+		</if>
+		ORDER BY t3.merchant_short_name
+	</select>
+
+</mapper>

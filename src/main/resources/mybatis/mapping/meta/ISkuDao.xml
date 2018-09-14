@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.meta.dao.ISkuDao">
+	<cache type="com.yunkouan.cache.RedisCache4Mybatis">
+		<property name="eternal" value="true"/>
+	    <property name="maxEntriesLocalHeap" value="1000"/>
+	    <property name="maxEntriesLocalDisk" value="10000000"/>
+	    <property name="memoryStoreEvictionPolicy" value="LRU"/>
+	</cache>
+
+	<select id="getMaxNo" resultType="java.lang.String" useCache="false" >
+		select max(sku_no) from meta_sku
+	</select>
+
+	<select id="list4stock" parameterType="SkuVo" resultType="MetaSku" useCache="false" >
+		select s.*
+		from meta_sku s left join meta_merchant m
+		on m.merchant_id = s.owner
+		where (s.min_safety_stock is not null or s.max_safety_stock is not null)
+		<if test="merchant != null and merchant.merchantName != null">
+			and m.merchant_name like concat('%', #{merchant.merchantName}, '%')
+		</if>
+		<if test="entity != null and entity.skuNo != null">
+			and s.sku_no like concat('%', #{entity.skuNo}, '%')
+		</if>
+	</select>
+
+	<select id="list" parameterType="SkuVo" resultType="MetaSku" useCache="false" >
+		select t1.*
+		from meta_sku t1 left join meta_merchant t2
+		on t2.merchant_id = t1.owner
+		where t1.org_id = #{entity.orgId}
+		and t1.warehouse_id = #{entity.warehouseId}
+		<if test="merchant != null and merchant.merchantName != null and merchant.merchantName != ''">
+			and t2.merchant_short_name like #{merchant.merchantName}
+		</if>
+		<if test="skuNoLike != null and skuNoLike != ''">
+			and t1.sku_no like #{skuNoLike}
+		</if>
+		<if test="skuNameLike != null and skuNameLike != ''">
+			and t1.sku_name like #{skuNameLike}
+		</if>
+		<if test="measureUnitLike != null and measureUnitLike != ''">
+			and t1.measure_unit like #{measureUnitLike}
+		</if>
+		<if test="entity != null and entity.skuNo != null and entity.skuNo != ''">
+			and t1.sku_no = #{entity.skuNo}  
+		</if>
+		<if test="entity != null and entity.skuName != null and entity.skuName != ''">
+			and t1.sku_name = #{entity.skuName}
+		</if>
+		<if test="entity != null and entity.owner != null and entity.owner != ''">
+			and t1.owner = #{entity.owner}
+		</if>
+		<if test="entity != null and entity.skuStatus != null and entity.skuStatus != ''">
+			and t1.sku_status = #{entity.skuStatus}
+		</if>
+		<if test="parentTypeId != null and parentTypeId != ''">
+			and t1.sku_type in (select sku_type_id from meta_sku_type where parent_id = #{parentTypeId})
+		</if>
+		<if test="entity == null or entity.skuStatus == null or entity.skuStatus == ''">
+			and t1.sku_status != 99
+		</if>
+		order by t1.sku_id2 desc
+	</select>
+	<!-- 根据货品代码，货主名称 查询货品是否存在 -->
+	<select id="findByOwnerSkuno" parameterType="SkuVo" resultType="MetaSku" useCache="false" >
+		select t1.* from meta_sku t1 join meta_merchant t2  on t1.owner=t2.merchant_id
+		where t2.merchant_short_name=#{merchant.merchantName} and t1.sku_no=#{entity.skuNo}
+		and t1.warehouse_id=#{entity.warehouseId}
+	</select>
+</mapper>

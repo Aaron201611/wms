@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<excel>
+	<ignore ignoreRow="1" ></ignore>
+	<object alias="vo" class="com.yunkouan.wms.modules.meta.vo.MaterialVo"></object>
+	<!-- 辅材名称 --><column obj="vo.entity">materialName</column>
+	<!-- 辅材条码 --><column obj="vo.entity">materialBarCode</column>
+	<!-- 辅材类型 --><column obj="vo">materialTypeName</column>
+	<!-- 计量单位 --><column obj="vo.entity">measureUnit</column>
+	<!-- 单重 --><column obj="vo.entity">perWeight</column>
+	<!-- 单体 --><column obj="vo.entity">perVolume</column>
+	<!-- 包装长 --><column obj="vo.entity">packLength</column>
+	<!-- 包装宽 --><column obj="vo.entity">packWidth</column>
+	<!-- 包装高 --><column obj="vo.entity">packHeight</column>
+	<!-- 数量 --><column obj="vo.entity">qty</column>
+	<!-- 状态 --><column obj="vo">materialStatusName</column>
+</excel>

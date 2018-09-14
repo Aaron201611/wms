@@ -1,0 +1,21 @@
+#mysql database setting
+jdbc.type=mysql
+jdbc.driver=com.mysql.jdbc.Driver
+
+#jdbc.type=oracle
+#jdbc.driver=oracle.jdbc.driver.OracleDriver
+
+#mysql
+jdbc.username=root
+jdbc.password=123456
+jdbc.url=jdbc:mysql://192.168.200.15:3306/wms?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=UTC
+
+#jdbc.username=wms
+#jdbc.password=1234
+#jdbc.url=jdbc:oracle:thin:@127.0.0.1:1521:orcl
+#jdbc.testSql=select 1 from dual
+
+#pool settings
+jdbc.pool.init=1
+jdbc.pool.minIdle=3
+jdbc.pool.maxActive=20

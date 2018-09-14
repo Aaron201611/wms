@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.inv.dao.IInventoryStatisticsDao">
+	
+	<!-- 根据货品明细、批次数量和库位，查询货品库存列表 add by 王通 -->
+	<select id="list" parameterType="InvInventoryStatisticsVO" resultType="InvInventoryStatistics">
+		SELECT
+		  t1.*
+		FROM
+		  inv_inventory_statistics t1,
+		  meta_sku t2,
+		  meta_merchant t3
+		WHERE t1.sku_id = t2.`sku_id`
+		  AND t2.owner = t3.merchant_id
+		  AND t1.warehouse_id = #{inventoryStatistics.warehouseId}
+		  AND t1.org_id = #{inventoryStatistics.orgId}
+		  AND t1.statistics_date &gt;= #{inventoryStatistics.statisticsDate}
+		  AND t1.statistics_date &lt; DATE_ADD(#{inventoryStatistics.statisticsDate}, INTERVAL #{circle} MONTH)
+		  AND t1.`statistics_date` &lt; DATE_FORMAT(NOW(),'%Y-%m')
+	  	  <if test="skuNoLike != null and skuNoLike != ''">
+		  	AND t2.sku_no like #{skuNoLike}
+		  </if> 
+	  	  <if test="skuNameLike != null and skuNameLike != ''">
+		  	AND t2.sku_name like #{skuNameLike}
+		  </if> 
+	  	  <if test="ownerNameLike != null and ownerNameLike != ''">
+		  	AND t3.merchant_short_name like #{ownerNameLike}
+		  </if> 
+  		ORDER BY t1.org_id, t1.`warehouse_id`, t1.`sku_id`,t1.statistics_date
+	</select>
+	
+	
+	<select id="countThisMonth" parameterType="InvInventoryStatisticsVO"  resultType="InvInventoryStatistics">
+	SELECT
+	  t1.`org_id`,
+	  t1.`warehouse_id`,
+	  t1.`sku_id`,
+	  DATE_FORMAT(NOW(), '%Y-%m-%d') `statistics_date`,
+	  IFNULL(t2.`in_stock_num`, 0) in_stock_num,
+	  IFNULL(t3.`out_stock_num`, 0) out_stock_num,
+	  IFNULL(t4.`adjust_num`, 0) adjust_num,
+	  IFNULL(t6.`stock_qty`, 0) period_end_num
+	FROM
+	  meta_merchant t5,
+	  meta_sku t1
+	  LEFT JOIN
+	    (SELECT
+	      t2.sku_id,
+	      t1.org_id,
+	      t1.warehouse_id,
+	      SUM(t2.receive_qty) in_stock_num
+	    FROM
+	      rec_asn t1,
+	      `rec_asn_detail` t2
+	    WHERE t1.asn_id = t2.asn_id
+	      AND t1.asn_status >= 60
+	      AND t1.asn_status != 99
+	      AND t1.`order_date` >= DATE_FORMAT(NOW(), '%Y-%m')
+	    GROUP BY t1.org_id,
+	      t1.warehouse_id,
+	      t2.sku_id) t2
+	    ON t1.sku_id = t2.sku_id
+	    AND t1.org_id = t2.org_id
+	    AND t1.warehouse_id = t2.warehouse_id
+	  LEFT JOIN
+	    (SELECT
+	      t2.sku_id,
+	      t1.org_id,
+	      t1.warehouse_id,
+	      SUM(t2.order_qty) out_stock_num
+	    FROM
+	      `send_delivery` t1,
+	      `send_delivery_detail` t2
+	    WHERE t1.delivery_id = t2.delivery_id
+	      AND t1.delivery_status = 96
+	      AND t1.`shipment_time` >= DATE_FORMAT(NOW(), '%Y-%m')
+	    GROUP BY t1.org_id,
+	      t1.warehouse_id,
+	      t2.sku_id) t3
+	    ON t1.sku_id = t3.sku_id
+	    AND t1.org_id = t3.org_id
+	    AND t1.warehouse_id = t3.warehouse_id
+	  LEFT JOIN
+	    (SELECT
+	      t2.sku_id,
+	      t1.org_id,
+	      t1.warehouse_id,
+	      SUM(t2.difference_qty) adjust_num
+	    FROM
+	      `inv_adjust` t1,
+	      `inv_adjust_detail` t2
+	    WHERE t1.adjust_id = t2.adjust_id
+	      AND t1.adjust_status = 20
+	      AND t1.`update_time` >= DATE_FORMAT(NOW(), '%Y-%m')
+	    GROUP BY t1.org_id,
+	      t1.warehouse_id,
+	      t2.sku_id) t4
+	    ON t1.sku_id = t4.sku_id
+	    AND t1.org_id = t4.org_id
+	    AND t1.warehouse_id = t4.warehouse_id
+	  LEFT JOIN
+	    (SELECT
+	      t1.sku_id,
+	      t1.org_id,
+	      t1.warehouse_id,
+	      SUM(t1.stock_qty) stock_qty
+	    FROM
+	      `inv_stock` t1
+	    WHERE t1.sku_status = 10
+	    GROUP BY t1.org_id,
+	      t1.warehouse_id,
+	      t1.sku_id) t6
+	    ON t1.sku_id = t6.sku_id
+	    AND t1.org_id = t6.org_id
+	    AND t1.warehouse_id = t6.warehouse_id
+	WHERE t1.sku_status = 20
+  	  AND t1.org_id = #{inventoryStatistics.orgId}
+  	  AND t1.warehouse_id = #{inventoryStatistics.warehouseId}
+  	  AND t1.owner = t5.merchant_id
+ 	  <if test="skuNoLike != null and skuNoLike != ''">
+	  	AND t1.sku_no like #{skuNoLike}
+	  </if> 
+	 	  <if test="skuNameLike != null and skuNameLike != ''">
+	  	AND t1.sku_name like #{skuNameLike}
+	  </if> 
+	 	  <if test="ownerNameLike != null and ownerNameLike != ''">
+	  	AND t5.merchant_short_name like #{ownerNameLike}
+	  </if> 
+	ORDER BY t1.org_id,
+	  t1.`warehouse_id`,
+	  t1.`sku_id`
+	</select>
+	
+	
+	<select id="countCurrentMonth" parameterType="InvInventoryStatistics" resultType="InvInventoryStatistics">
+	SELECT
+	  t1.`org_id`,
+	  t1.`warehouse_id`,
+	  t1.`sku_id`,
+	  DATE_FORMAT(NOW(), '%Y-%m-%d') `statistics_date`,
+	  IFNULL(t2.`in_stock_num`, 0) in_stock_num,
+	  IFNULL(t3.`out_stock_num`, 0) out_stock_num,
+	  IFNULL(t4.`adjust_num`, 0) adjust_num,
+	  IFNULL(t5.stock_qty, 0) period_end_num
+	FROM
+	  meta_sku t1
+	  LEFT JOIN
+	    (SELECT
+	      t2.sku_id,
+	      t1.org_id,
+	      t1.warehouse_id,
+	      SUM(t2.receive_qty) in_stock_num
+	    FROM
+	      rec_asn t1,
+	      `rec_asn_detail` t2
+	    WHERE t1.asn_id = t2.asn_id
+	      AND t1.asn_status &gt;= 60
+	      AND t1.asn_status != 99
+	      AND t1.`order_date` &gt;= DATE_FORMAT(NOW(), '%Y-%m')
+	    GROUP BY t1.org_id,
+	      t1.warehouse_id) t2
+	    ON t1.sku_id = t2.sku_id
+	    AND t1.org_id = t2.org_id
+	    AND t1.warehouse_id = t2.warehouse_id
+	  LEFT JOIN
+	    (SELECT
+	      t2.sku_id,
+	      t1.org_id,
+	      t1.warehouse_id,
+	      SUM(t2.order_qty) out_stock_num
+	    FROM
+	      `send_delivery` t1,
+	      `send_delivery_detail` t2
+	    WHERE t1.delivery_id = t2.delivery_id
+	      AND t1.delivery_status = 96
+	      AND t1.`shipment_time` &gt;= DATE_FORMAT(NOW(), '%Y-%m')
+	    GROUP BY t1.org_id,
+	      t1.warehouse_id,
+	      t2.sku_id) t3
+	    ON t1.sku_id = t3.sku_id
+	    AND t1.org_id = t3.org_id
+	    AND t1.warehouse_id = t3.warehouse_id
+	  LEFT JOIN
+	    (SELECT
+	      t2.sku_id,
+	      t1.org_id,
+	      t1.warehouse_id,
+	      SUM(t2.difference_qty) adjust_num
+	    FROM
+	      `inv_adjust` t1,
+	      `inv_adjust_detail` t2
+	    WHERE t1.adjust_id = t2.adjust_id
+	      AND t1.adjust_status = 20
+	      AND t1.`update_time` &gt;= DATE_FORMAT(NOW(), '%Y-%m')
+	    GROUP BY t1.org_id,
+	      t1.warehouse_id,
+	      t2.sku_id) t4
+	    ON t1.sku_id = t4.sku_id
+	    AND t1.org_id = t4.org_id
+	    AND t1.warehouse_id = t4.warehouse_id
+	  LEFT JOIN
+	    (SELECT
+	      sku_id,
+	      org_id,
+	      warehouse_id,
+	      SUM(stock_qty) stock_qty
+	    FROM
+	      inv_stock
+	    GROUP BY sku_id,
+	      org_id,
+	      warehouse_id,
+	      sku_id) t5
+	    ON t1.sku_id = t5.sku_id
+	    AND t1.`org_id` = t5.org_id
+	    AND t1.`warehouse_id` = t5.warehouse_id
+	WHERE t1.sku_status = 20
+	<if test="skuId != null and skuId != ''">
+  		AND t1.sku_id = #{skuId}
+  	</if> 
+	<if test="orgId != null and orgId != ''">
+  		AND t1.org_id = #{orgId}
+  	</if> 
+	<if test="warehouseId != null and warehouseId != ''">
+  		AND t1.warehouse_id = #{warehouseId}
+  	</if> 
+	ORDER BY t1.org_id,
+	  t1.`warehouse_id`,
+	  t1.`sku_id`	
+	</select>
+	
+	<update id="updateLastMonth">
+	UPDATE
+	  `inv_inventory_statistics` t0,
+	  meta_sku t1
+	  LEFT JOIN
+	    (SELECT
+	      t2.sku_id,
+	      t1.org_id,
+	      t1.warehouse_id,
+	      SUM(t2.receive_qty) in_stock_num
+	    FROM
+	      rec_asn t1,
+	      `rec_asn_detail` t2
+	    WHERE t1.asn_id = t2.asn_id
+	      AND t1.asn_status &gt;= 60
+	      AND t1.asn_status != 99
+	      AND t1.`order_date` &gt;= DATE_FORMAT(
+	        DATE_ADD(NOW(), INTERVAL - 1 MONTH),
+	        '%Y-%m'
+	      )
+	      AND t1.order_date &lt; DATE_FORMAT(NOW(), '%Y-%m')
+	    GROUP BY t1.org_id,
+	      t1.warehouse_id,
+	      t2.sku_id) t2
+	    ON t1.sku_id = t2.sku_id
+	    AND t1.org_id = t2.org_id
+	    AND t1.warehouse_id = t2.warehouse_id
+	  LEFT JOIN
+	    (SELECT
+	      t2.sku_id,
+	      t1.org_id,
+	      t1.warehouse_id,
+	      SUM(t2.order_qty) out_stock_num
+	    FROM
+	      `send_delivery` t1,
+	      `send_delivery_detail` t2
+	    WHERE t1.delivery_id = t2.delivery_id
+	      AND t1.delivery_status = 96
+	      AND t1.`shipment_time` &gt;= DATE_FORMAT(
+	        DATE_ADD(NOW(), INTERVAL - 1 MONTH),
+	        '%Y-%m'
+	      )
+	      AND t1.shipment_time &lt; DATE_FORMAT(NOW(), '%Y-%m')
+	    GROUP BY t1.org_id,
+	      t1.warehouse_id,
+	      t2.sku_id) t3
+	    ON t1.sku_id = t3.sku_id
+	    AND t1.org_id = t3.org_id
+	    AND t1.warehouse_id = t3.warehouse_id
+	  LEFT JOIN
+	    (SELECT
+	      t2.sku_id,
+	      t1.org_id,
+	      t1.warehouse_id,
+	      SUM(t2.difference_qty) adjust_num
+	    FROM
+	      `inv_adjust` t1,
+	      `inv_adjust_detail` t2
+	    WHERE t1.adjust_id = t2.adjust_id
+	      AND t1.adjust_status = 20
+	      AND t1.`update_time` &gt;= DATE_FORMAT(
+	        DATE_ADD(NOW(), INTERVAL - 1 MONTH),
+	        '%Y-%m'
+	      )
+	      AND t1.update_time &lt; DATE_FORMAT(NOW(), '%Y-%m')
+	    GROUP BY t1.org_id,
+	      t1.warehouse_id,
+	      t2.sku_id) t4
+	    ON t1.sku_id = t4.sku_id
+	    AND t1.org_id = t4.org_id
+	    AND t1.warehouse_id = t4.warehouse_id 
+	    SET t0.`in_stock_num` = IFNULL(t2.`in_stock_num`, 0),
+	  		t0.out_stock_num = IFNULL(- t3.`out_stock_num`, 0),
+	  		t0.`adjust_num` = IFNULL(t4.`adjust_num`, 0),
+	  		t0.period_end_num = (
+	    IFNULL(t0.period_begin_num, 0) 
+	    + IFNULL(t2.`in_stock_num`, 0) 
+	    - IFNULL(t3.`out_stock_num`, 0) 
+	    + IFNULL(t4.`adjust_num`, 0)
+	  )
+	WHERE t1.sku_status = 20
+	  AND t1.sku_id = t0.sku_id
+	  AND t1.org_id = t0.org_id
+	  AND t1.warehouse_id = t0.warehouse_id
+	  AND DATE_FORMAT(t0.statistics_date, '%Y-%m') = DATE_FORMAT(
+	    DATE_ADD(NOW(), INTERVAL - 1 MONTH),
+	    '%Y-%m')
+	</update>
+	
+	<insert id="insertThisMonth">
+	INSERT INTO `inv_inventory_statistics` (
+	  `id`,
+	  `org_id`,
+	  `warehouse_id`,
+	  `sku_id`,
+	  `statistics_date`,
+	  `period_begin_num`,
+	  `in_stock_num`,
+	  `out_stock_num`,
+	  `adjust_num`,
+	  `period_end_num`,
+	  `create_person`,
+	  `create_time`,
+	  `update_person`,
+	  `update_time`
+	)
+	SELECT
+	  UPPER(REPLACE(UUID(), '-', '')),
+	  t1.org_id,
+	  t1.warehouse_id,
+	  t1.sku_id,
+	  DATE_FORMAT(NOW(), '%Y-%m-%d'),
+	  IFNULL(
+	    IFNULL(
+	      t2.period_end_num,
+	      IFNULL(t3.stock_qty, 0) - IFNULL(t4.adjust_qty, 0)
+	    ),
+	    0
+	  ),
+	  0,
+	  0,
+	  0,
+	  0,
+	  '1',
+	  NOW(),
+	  '1',
+	  NOW()
+	FROM
+	  meta_sku t1
+	  LEFT JOIN inv_inventory_statistics t2
+	    ON t1.sku_id = t2.sku_id
+	    AND t1.org_id = t2.org_id
+	    AND t1.warehouse_id = t2.warehouse_id
+	    AND DATE_FORMAT(t2.statistics_date, '%Y-%m') = DATE_FORMAT(
+	      DATE_ADD(NOW(), INTERVAL - 1 MONTH),
+	      '%Y-%m'
+	    )
+	  LEFT JOIN
+	    (SELECT
+	      sku_id,
+	      org_id,
+	      warehouse_id,
+	      SUM(stock_qty) stock_qty
+	    FROM
+	      inv_stock
+	    GROUP BY sku_id,
+	      org_id,
+	      warehouse_id) t3
+	    ON t1.sku_id = t3.sku_id
+	    AND t1.org_id = t3.org_id
+	    AND t1.warehouse_id = t3.warehouse_id
+	  LEFT JOIN
+	    (SELECT
+	      sku_id,
+	      org_id,
+	      warehouse_id,
+	      SUM(qty) adjust_qty
+	    FROM
+	      `inv_log`
+	    WHERE create_time &gt;= DATE_FORMAT(NOW(), '%Y-%m-%d')
+	    GROUP BY sku_id,
+	      org_id,
+	      warehouse_id) t4
+	    ON t1.sku_id = t4.sku_id
+	    AND t1.`org_id` = t4.org_id
+	    AND t1.`warehouse_id` = t4.warehouse_id
+	WHERE t1.sku_status = 20
+	</insert>
+</mapper>

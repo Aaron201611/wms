@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.inv.dao.ICountDao">
+	
+	<!-- 查询盘点单列表列表 add by 王通 -->
+	<select id="list" parameterType="InvCountVO" resultType="InvCount">
+		SELECT
+			t1.count_id,
+			t1.count_no,
+			t1.count_type,
+			t1.owner,
+			t1.is_block_location,
+			t1.location_id,
+			t1.sku_id,
+			t1.shift_times,
+			t1.count_status,
+			t1.trans_status,
+			t1.create_person,
+			t1.create_time,
+			t1.op_person,
+			t1.op_time,
+			t1.apply_person,
+			t1.apply_time,
+			t1.apply_warehouse,
+			t1.hg_no,
+			t1.result,
+			t1.note,
+			t1.org_id,
+			t1.warehouse_id,
+			t1.update_person,
+			t1.update_time
+			FROM inv_count t1
+			WHERE t1.warehouse_id = #{invCount.warehouseId}
+			AND t1.org_id = #{invCount.orgId}
+			<if test="countIdList != null">
+				AND t1.count_id in
+				<foreach collection="countIdList" item="item" index="index" open="(" separator="," close=")" > 
+					#{item}
+				</foreach>
+			</if> 
+			<if test="ownerName != null and ownerName != ''">
+				AND EXISTS 
+				(	SELECT 1 
+					FROM meta_merchant t2
+					WHERE 
+						t1.owner = t2.merchant_id 
+						AND t2.merchant_status = 20
+						AND t2.merchant_name like #{ownerName} 
+				)
+			</if> 
+			<if test="invCount.countStatus != null and invCount.countStatus != ''">
+				AND t1.count_status = #{invCount.countStatus}
+			</if> 
+			<if test="invCount.countType != null and invCount.countType != ''">
+				AND t1.count_type = #{invCount.countType}
+			</if> 
+			<if test="beginTime != null and beginTime != ''">
+				AND t1.create_time >= CONCAT(#{beginTime},' 00:00:00')
+			</if>
+			<if test="endTime != null and endTime != ''">
+				AND t1.create_time &lt;= CONCAT(#{endTime},' 23:59:59')
+			</if>
+		ORDER BY t1.CREATE_TIME DESC
+	</select>
+	
+	<select id="getTask" parameterType="String" resultType="String">
+		select
+		warehouse_id from inv_count where count_status=10 and org_id=#{orgId}
+	</select>
+</mapper>

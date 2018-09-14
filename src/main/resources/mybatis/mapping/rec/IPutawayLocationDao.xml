@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.rec.dao.IPutawayLocationDao">
+	<sql id="table_name">
+		rec_putaway_location as loc
+	</sql>
+	<sql id="common_where">
+		 loc.warehouse_id = #{putawayLocation.warehouseId}
+		 AND loc.org_id = #{putawayLocation.orgId}
+	</sql>
+	
+	
+	<!-- 根据上架单id，查询上架单操作明细 -->
+	<select id="selectPtwLocationByPtwId" parameterType="RecPutawayLocationVO" resultType="RecPutawayLocation">
+		SELECT
+			*
+		FROM 
+			<include refid="table_name"></include>
+		WHERE
+			<include refid="common_where"></include>
+			<if test="putawayLocation.putawayType != null">
+				AND putaway_type = #{putawayLocation.putawayType}
+			</if>
+			AND EXISTS (
+						SELECT 1 
+						FROM rec_putaway_detail detail 
+						WHERE loc.putaway_detail_id = detail.putaway_detail_id 
+						AND detail.putaway_id = #{putawayId})
+	</select>
+	
+</mapper>

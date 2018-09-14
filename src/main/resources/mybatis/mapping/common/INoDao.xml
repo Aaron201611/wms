@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.common.dao.INoDao">
+
+	<update id="increaseSequence" parameterType="Sequence">
+		UPDATE sequence SET current_value = current_value + s_increment
+		WHERE id = #{id} AND current_value = #{currentValue}
+	</update>
+
+</mapper>

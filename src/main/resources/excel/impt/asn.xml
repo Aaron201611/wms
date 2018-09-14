@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<excel>
+	<ignore ignoreRow="1" ></ignore>
+	<object alias="vo" class="com.yunkouan.wms.modules.rec.vo.RecAsnVO"></object>
+	<!-- 客商 --><column obj="vo.ownerMerchant">merchantNo</column>
+	<!-- 单据类型 --><column obj="vo">docTypeComment</column>
+	<!-- 源单号 --><column obj="vo.asn">poNo</column>
+	<!-- ASN单号1 --><column obj="vo.asn">asnNo1</column>
+	<!-- 订单日期 --><column obj="vo.asn" format="yyyy/MM/dd">orderDate</column>
+	<!-- 预定收货时间 --><column obj="vo.asn" format="yyyy/MM/dd HH:mm:ss">appointmentTime</column>
+	<!-- 发货方 --><column obj="vo.senderMerchant">merchantNo</column>
+	<!-- 发货联系人 --><column obj="vo.asn">contactPerson</column>
+	<!-- 发货联系人电话 --><column obj="vo.asn">contactPhone</column>
+	<!-- 发货方地址 --><column obj="vo.asn">contactAddress</column>
+	<!-- 货品代码 --><column obj="vo">skuNo</column>
+	<!-- 货品代码 --><column obj="vo">skuName</column>
+	<!-- 订单数量 --><column obj="vo.saveRecAsnDetail">orderQty</column>
+	<!-- 订单重量 --><column obj="vo.saveRecAsnDetail">orderWeight</column>
+	<!-- 订单体积 --><column obj="vo.saveRecAsnDetail">orderVolume</column>
+	<!-- 计量单位 --><column obj="vo.saveRecAsnDetail">measureUnit</column>
+	<!-- 批次 --><column obj="vo.saveRecAsnDetail">batchNo</column>
+	<!-- 备注 --><column obj="vo.asn">note</column>
+</excel>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.send.dao.IPickDetailDao">
+	<!-- 查询拣货明细列表 -->
+	<select id="qryList"  parameterType="com.yunkouan.wms.modules.send.entity.SendPickDetail" resultType="com.yunkouan.wms.modules.send.entity.SendPickDetail">
+		select * 
+		 from send_pick_detail		 
+		 <where>
+		 	<if test="orgId !=null">
+		   		org_id = #{orgId}
+		   	</if>
+		   	<if test="warehouseId !=null">
+		   		and warehouse_id = #{warehouseId}
+		   	</if>
+		   	<if test="deliveryId !=null">
+		    	and delivery_id = #{deliveryId}
+		    </if>		   
+		    <if test="pickId !=null">
+		     	and pick_id = #{pickId}
+		    </if>
+		 </where>  
+		 order by update_time desc
+	</select>
+
+
+
+	
+</mapper>

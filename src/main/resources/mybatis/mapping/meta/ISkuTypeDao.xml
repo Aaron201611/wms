@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.meta.dao.ISkuTypeDao">
+	<cache type="com.yunkouan.cache.RedisCache4Mybatis">
+		<property name="eternal" value="true"/>
+	    <property name="maxEntriesLocalHeap" value="1000"/>
+	    <property name="maxEntriesLocalDisk" value="10000000"/>
+	    <property name="memoryStoreEvictionPolicy" value="LRU"/>
+	</cache>
+
+	<select id="getMaxNo" resultType="java.lang.String" useCache="false">
+		select max(sku_type_no) from meta_sku_type
+	</select>
+
+	<select id="selectByVo" parameterType="SkuTypeVo" resultType="MetaSkuType" useCache="false">
+		SELECT t1.*
+		FROM meta_sku_type t1 LEFT JOIN meta_sku_type t2
+		ON t1.parent_id = t2.sku_type_id
+		LEFT JOIN meta_merchant t3 
+		ON t1.owner = t3.merchant_id
+		WHERE t1.org_id=#{entity.orgId}
+		<if test="merchantNameLike != null and merchantNameLike != ''">
+			AND t3.merchant_name like #{merchantNameLike}
+			AND t3.merchant_status = '20'
+		</if>
+		<if test="skuTypeNoLike != null and skuTypeNoLike != ''">
+			AND t1.sku_type_no like #{skuTypeNoLike}
+		</if>
+		<if test="skuTypeNameLike != null and skuTypeNameLike != ''">
+			AND t1.sku_type_name like #{skuTypeNameLike}
+		</if>
+		<if test="parentNoLike != null and parentNoLike != ''">
+			AND t2.sku_type_no like #{parentNoLike}
+		</if>
+		<if test="entity.skuTypeNo != null and entity.skuTypeNo != ''">
+			AND t1.sku_type_no = #{entity.skuTypeNo}
+		</if>
+		<if test="entity.skuTypeName != null and entity.skuTypeName != ''">
+			AND t1.sku_type_name = #{entity.skuTypeName}
+		</if>
+		<if test="entity.parentId != null and entity.parentId != ''">
+			AND t1.parent_id = #{entity.parentId}
+		</if>
+		<if test="parentNo != null and parentNo != ''">
+			AND t2.sku_type_no = #{parentNo}
+		</if>
+		<if test="entity.owner != null and entity.owner != ''">
+			AND t1.owner = #{entity.owner}
+		</if>
+		<if test="entity.skuTypeStatus != null and entity.skuTypeStatus != ''">
+			AND t1.sku_type_status = #{entity.skuTypeStatus}
+		</if>
+		<if test="entity.skuTypeStatus == null or entity.skuTypeStatus == ''">
+			AND t1.sku_type_status != 99
+		</if>
+		ORDER BY t1.UPDATE_TIME DESC
+	</select>
+
+</mapper>

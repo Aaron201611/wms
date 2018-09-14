@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.rec.dao.IASNDao">
+	<sql id="table_name">
+		rec_asn as asn
+	</sql>
+	<sql id="common_where">
+		 asn.warehouse_id = #{asn.warehouseId}
+		 AND asn.org_id = #{asn.orgId}
+	</sql>
+	
+	<!-- 根据Asn单id查询Asn单信息 -->
+	<select id="selectAsnForUpdate" parameterType="recAsnVO" resultType="recAsn">
+		SELECT * FROM rec_asn WHERE asn_id=#{asnId} FOR UPDATE 
+	</select>
+	
+	<!-- 页面 - 查询ASN单列表 add by andy wang -->
+	<select id="selectAsn" parameterType="recAsnVO" resultType="recAsn">
+		SELECT 
+			 asn_id , owner , warehouse_id , asn_no , parent_asn_id , doc_type , data_from , po_no , asn_no1 ,
+			 asn_no2 , order_date , order_qty , order_weight , order_volume , receive_qty , receive_weight ,
+			 receive_volume , asn_status , create_person , update_person 
+		FROM 
+			<include refid="table_name" />
+		<where>
+			<include refid="common_where" />
+			AND asn_status != 99
+			<if test="ownerComment != null and ownerComment != ''">
+				AND EXISTS 
+					(	SELECT 1 
+						FROM meta_merchant merchant 
+						WHERE 
+							asn.owner=merchant.merchant_id 
+							AND merchant_status = 1 
+							AND merchant_name like #{likeOwner} 
+					)
+			</if>
+			<if test="asn.poNo != null and asn.poNo != ''">
+				AND po_no = #{asn.poNo}
+			</if>
+			<if test="asn.asnNo != null and asn.asnNo != ''">
+				AND asn_no = #{asn.asnNo}
+			</if>
+			<if test="asn.asnStatus != null">
+				AND asn_status = #{asn.asnStatus}
+			</if>
+			<if test="putawayId != null and putawayId != ''">
+				AND EXISTS 
+					(	SELECT 1 
+						FROM rec_putaway_detail putawayDetail 
+						WHERE 
+							asn.asn_id = putawayDetail.asn_id
+							AND putawayDetail.putaway_id = #{putawayId}
+					)
+			</if>
+		</where>
+		ORDER BY asn_id2 DESC
+	</select>
+	
+	<!-- 页面 - 根据asn单id查询asn信息 add by andy wang  -->
+	<select id="findAsnById" parameterType="recAsnVO" resultType="recAsn" >
+		SELECT 
+			 asn_id , warehouse_id , asn_no , po_no , asn_no1 , asn_no2 , doc_type , receive_qty , receive_weight ,
+	 		 receive_volume , order_date , owner , sender , contact_person , contact_phone , contact_address , note ,
+	 		 asn_status 
+	 	FROM
+	 		<include refid="table_name" />
+	 	WHERE
+	 		<include refid="common_where" />
+			AND asn_status != 99
+	 		AND asn_id = #{asn.asnId}
+	</select>
+	<select id="getTask" parameterType="String" resultType="String">
+		select
+		warehouse_id from rec_asn where asn_status=10 and org_id=#{orgId}
+	</select>
+</mapper>

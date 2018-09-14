@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<excel>
+	<ignore ignoreRow="1" ></ignore>
+	<object alias="vo" class="com.yunkouan.wms.modules.meta.vo.SkuVo"></object>
+	<!-- 货主 --><column obj="vo.merchant">merchantName</column>
+	<!-- 货品名称 --><column obj="vo.entity">skuName</column>
+	<!-- 货品代码 --><column obj="vo.entity">skuNo</column>
+	<!-- 海关货号 --><column obj="vo.entity">hgGoodsNo</column>
+	<!-- 货品条码 --><column obj="vo.entity">skuBarCode</column>
+	<!-- 计量单位 --><column obj="vo.entity">measureUnit</column>
+	<!-- 规格型号 --><column obj="vo.entity">specModel</column>
+	<!-- 单重 --><column obj="vo.entity">perWeight</column>
+	<!-- 长 --><column obj="vo.entity">length</column>
+	<!-- 宽 --><column obj="vo.entity">width</column>
+	<!-- 高 --><column obj="vo.entity">height</column>
+	<!-- 货品类型2名称 --><column obj="vo">skuTypeName</column>
+	<!-- 安全库存下限 --><column obj="vo.entity">minSafetyStock</column>
+	<!-- 安全库存上限 --><column obj="vo.entity">maxSafetyStock</column>
+	<!-- 补货警戒数量 --><column obj="vo.entity">minReplenishStock</column>
+	<!-- 补货上限数量 --><column obj="vo.entity">maxReplenishStock</column>
+	<!-- 海关归类税号 --><column obj="vo.entity">hsCode</column>
+	<!-- 项号 --><column obj="vo.entity">gNo</column>
+	<!-- 料件性质 --><column obj="vo">goodsNatureComment</column>
+	<!-- 币制 --><column obj="vo">currComment</column>
+	<!-- 币制 --><column obj="vo">originCountryName</column>
+	<!-- 单价 --><column obj="vo.entity">perPrice</column>
+	<!-- 申报价 --><column obj="vo.entity">declarePrice</column>
+	<!-- 品牌 --><column obj="vo.entity">brand</column>
+	<!-- 属性1 --><column obj="vo.entity">attribute1</column>
+	<!-- 属性2 --><column obj="vo.entity">attribute2</column>
+	<!-- 属性3 --><column obj="vo.entity">attribute3</column>
+	<!-- 属性4 --><column obj="vo.entity">attribute4</column>
+	<!-- 保质期 --><column obj="vo.entity">shelflife</column>
+	<!-- 提前预警 --><column obj="vo.entity">overdueWarningDays</column>
+	<!-- 备注 --><column obj="vo.entity">note</column>
+	<!-- 状态 --><column obj="vo">skuStatus</column>
+</excel>

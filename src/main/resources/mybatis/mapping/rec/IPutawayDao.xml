@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.wms.modules.rec.dao.IPutawayDao">
+	
+	<sql id="table_name">
+		rec_putaway as putaway
+	</sql>
+	<sql id="common_where">
+		 putaway.warehouse_id = #{putaway.warehouseId}
+		 AND putaway.org_id = #{putaway.orgId}
+	</sql>
+	
+	<!-- 查询上架单 add by andy -->
+	<select id="selectPutaway" parameterType="RecPutawayVO" resultType="RecPutaway">
+		SELECT 
+			DISTINCT putaway.*
+		FROM
+			<include refid="table_name"></include>
+			INNER JOIN rec_putaway_detail putawayDetail ON putaway.putaway_id = putawayDetail.putaway_id
+		WHERE
+			<include refid="common_where" />
+			AND putaway.putaway_status != 99
+			<if test="(poNo != null and poNo != '') or (asnNo != null and asnNo != '')">
+				AND EXISTS 
+					(	SELECT 1 
+						FROM rec_asn asn 
+						WHERE putawayDetail.asn_id = asn.asn_id
+							<if test="poNo != null and poNo != ''">
+								AND asn.po_no = #{poNo}
+							</if>
+							<if test="asnNo != null and asnNo != ''">
+								AND asn.asn_no = #{asnNo}
+							</if>
+					)
+			</if>
+			<if test="putaway.putawayStatus != null">
+				AND putaway.putaway_status = #{putaway.putawayStatus}
+			</if>
+		ORDER BY putaway.putaway_id2 DESC
+	</select>
+	<select id="getTask" parameterType="String" resultType="String">
+		select
+		warehouse_id from rec_putaway where putaway_status=10 and org_id=#{orgId}
+	</select>
+	
+</mapper>

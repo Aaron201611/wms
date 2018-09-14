@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunkouan.saas.modules.sys.dao.IAuthDao">
+	<cache type="com.yunkouan.cache.RedisCache4Mybatis">
+		<property name="eternal" value="true"/>
+	    <property name="maxEntriesLocalHeap" value="1000"/>
+	    <property name="maxEntriesLocalDisk" value="10000000"/>
+	    <property name="memoryStoreEvictionPolicy" value="LRU"/>
+	</cache>
+
+	<select id="query" parameterType="AuthVo" resultType="SysAuth" useCache="false">
+		select distinct ah.*
+		from sys_role r, sys_account_role a, sys_role_auth ra, sys_org_auth oa, sys_auth ah
+		where a.role_id = r.role_id
+		and ra.role_id = a.role_id
+		and oa.org_auth_id = ra.org_auth_id
+		and ah.auth_id = oa.auth_id
+		<if test="accountId != null">
+			and a.account_id = #{accountId}
+		</if>
+		<if test="orgId != null">
+			and a.org_id = #{orgId}
+		</if>
+		<if test="warehouseId != null">
+			and a.warehouse_id = #{warehouseId}
+		</if>
+		<if test="entity != null and entity.authStatus != null">
+			and r.role_status = #{entity.authStatus}
+			and ah.auth_status = #{entity.authStatus}
+		</if>
+		<if test="entity != null and entity.authType != null">
+			and ah.auth_type = #{entity.authType}
+		</if>
+		<if test="entity != null and entity.authLevel != null">
+			and ah.auth_level = #{entity.authLevel}
+		</if>
+		<if test="entity != null and entity.parentId != null">
+			and ah.parent_id = #{entity.parentId}
+		</if>
+		<if test="types != null">
+			and ah.auth_type in 
+			<foreach item="item" index="index" collection="types" open="(" separator="," close=")">
+			  #{item}
+			</foreach>
+		</if>
+		<if test="levels != null">
+			and ah.auth_level in 
+			<foreach item="item" index="index" collection="levels" open="(" separator="," close=")">
+			  #{item}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="query4admin" parameterType="AuthVo" resultType="SysAuth" useCache="false">
+		select distinct ah.*
+		from sys_administrator_role a, sys_admin_role_auth ra, sys_auth ah
+		where ra.role_id = a.role_id
+		and ah.auth_id = ra.auth_id
+		<if test="accountId != null">
+			and a.admin_id = #{accountId}
+		</if>
+		<if test="entity != null and entity.authStatus != null">
+			and ah.auth_status = #{entity.authStatus}
+		</if>
+		<if test="entity != null and entity.authType != null">
+			and ah.auth_type = #{entity.authType}
+		</if>
+		<if test="entity != null and entity.authLevel != null">
+			and ah.auth_level = #{entity.authLevel}
+		</if>
+		<if test="entity != null and entity.parentId != null">
+			and ah.parent_id = #{entity.parentId}
+		</if>
+		<if test="types != null">
+			and ah.auth_type in 
+			<foreach item="item" index="index" collection="types" open="(" separator="," close=")">
+			  #{item}
+			</foreach>
+		</if>
+		<if test="levels != null">
+			and ah.auth_level in 
+			<foreach item="item" index="index" collection="levels" open="(" separator="," close=")">
+			  #{item}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="listAll" parameterType="AuthVo" resultType="SysAuth" useCache="false">
+		select ah.* from sys_auth ah
+		where ah.auth_status = #{entity.authStatus}
+		<if test="entity != null and entity.authType != null">
+			and ah.auth_type = #{entity.authType}
+		</if>
+		<if test="entity != null and entity.authLevel != null">
+			and ah.auth_level = #{entity.authLevel}
+		</if>
+		<if test="entity != null and entity.parentId != null">
+			and ah.parent_id = #{entity.parentId}
+		</if>
+		<if test="types != null">
+			and ah.auth_type in 
+			<foreach item="item" index="index" collection="types" open="(" separator="," close=")">
+			  #{item}
+			</foreach>
+		</if>
+		<if test="levels != null">
+			and ah.auth_level in 
+			<foreach item="item" index="index" collection="levels" open="(" separator="," close=")">
+			  #{item}
+			</foreach>
+		</if>
+	</select>
+
+</mapper>
