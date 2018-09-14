@@ -194,4 +194,5 @@ public interface ISkuService {
 	
 	public ResponseEntity<byte[]> downloadBatchAjdustmentDemo() throws Exception;
 	public MetaSku getBySkuNo(String skuNo);
+	ResponseEntity<byte[]> skuExport(List<String> list) throws Exception;
 }

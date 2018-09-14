@@ -46,6 +46,7 @@ public class SkuVo extends BaseVO {
 	 * @version 2017年5月16日 下午7:53:25<br/>
 	 * @author 王通<br/>
 	 */
+	
 	private String measureUnitLike;
 	/**@Fields 状态名称 */
 	private String skuStatus;
@@ -75,6 +76,7 @@ public class SkuVo extends BaseVO {
 	private String goodsNatureComment;
 	
 	private String originCountryName;
+	private List<String >ids;
 
 	public SkuVo() {this.entity=new MetaSku();}
 	public SkuVo(MetaSku entity) {
@@ -127,6 +129,9 @@ public class SkuVo extends BaseVO {
 		}
 		if(entity.getSkuStatus() != null) {
 			c.andEqualTo("skuStatus", entity.getSkuStatus());
+		}
+		if(ids!=null&&ids.size()>0){
+			c.andIn("skuId", ids);
 		}
 		return example;
 	}
@@ -299,6 +304,14 @@ public class SkuVo extends BaseVO {
 	public void setParentTypeId(String parentTypeId) {
 		this.parentTypeId = parentTypeId;
 	}
+	public List<String> getIds() {
+		return ids;
+	}
+	
+	public void setIds(List<String> ids) {
+		this.ids = ids;
+	}
+	
 	
 	
 	
