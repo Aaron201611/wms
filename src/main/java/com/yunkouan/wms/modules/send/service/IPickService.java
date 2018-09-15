@@ -273,6 +273,14 @@ public interface IPickService {
 	public void completePick(SendPickVo pickVo,String operator)throws Exception;
 	
 	/**
+	 * 批量作业确认（芜湖）
+	 * @param pickVo
+	 * @param operator
+	 * @throws Exception
+	 */
+	public void batchCompletePick(SendPickVo baPickVo,String operator)throws Exception;
+	
+	/**
 	 * 根据发货单明细查询拣货数量
 	 * @param deliberyDetailIds
 	 * @return

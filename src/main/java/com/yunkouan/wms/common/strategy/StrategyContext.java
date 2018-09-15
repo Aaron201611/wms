@@ -38,10 +38,10 @@ public class StrategyContext {
 	* @return
 	* IAssisService
 	*/
-	public IAssisService getStrategy4Assis() {
-		IAssisService bean = getBean(null, null, "05");
-		return bean;
-	}
+//	public IAssisService getStrategy4Assis() {
+//		IAssisService bean = getBean(null, null, "05");
+//		return bean;
+//	}
 
 	/**
 	 * 得到备份主键生成策略实现

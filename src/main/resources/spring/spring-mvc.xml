@@ -159,7 +159,7 @@
 
 
 
-	<!-- job的配置开始 -->  
+	<!-- job的配置开始  
    <bean id="receiveJob"  
        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
        <property name="targetObject">  
@@ -178,43 +178,43 @@
        <property name="targetMethod">  
            <value>execute</value>  
        </property>  
-   </bean>  
+   </bean>  --> 
    <!-- job的配置结束 -->
    
-   <!-- 调度的配置开始 -->  
+   <!-- 调度的配置开始   
    <bean id="crontestJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
        <property name="jobDetail">  
            <ref bean="receiveJob" />  
        </property>  
        <property name="cronExpression">  
-           <value>1 0/1 * * * ?</value>  <!-- Cron表达式“10 */1 * * * ?”意为：从10秒开始，每1分钟执行一次。  -->  
+           <value>1 0/1 * * * ?</value>  <!-- Cron表达式“10 */1 * * * ?”意为：从10秒开始，每1分钟执行一次。 
        </property>  
-   </bean> 
+   </bean> -->
    
-   <!-- 定时发送出入库数据 -->
+   <!-- 定时发送出入库数据 
    <bean id="crontestJobTrigger2" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
        <property name="jobDetail">  
            <ref bean="sendDataJob" />  
        </property>  
        <property name="cronExpression">  
-           <value>0 5 0 * * ?</value>  <!-- Cron表达式“0 5 0 * * ?”意为：每天0点5分执行。  -->  
+           <value>0 5 0 * * ?</value>  <!-- Cron表达式“0 5 0 * * ?”意为：每天0点5分执行。  
        </property>  
-   </bean> 
+   </bean> -->
    <!-- 调度的配置结束 -->
    
-  <!-- 启动触发器的配置开始 -->
+  <!-- 启动触发器的配置开始 
    <bean name="startQuertz" lazy-init="false" autowire="no"  
        class="org.springframework.scheduling.quartz.SchedulerFactoryBean">  
        <property name="triggers">  
            <list>  
            		<!-- <ref bean="crontestJobTrigger2" /> 
-                <ref bean="crontestJobTrigger" />  -->
+                <ref bean="crontestJobTrigger" />
            </list>  
        </property>  
-   </bean>
+   </bean>-->
    <!-- 启动触发器的配置结束 -->
 
-	<!-- 【哈尔滨】分布式定时任务调度begin -->
+	<!-- 【哈尔滨】分布式定时任务调度begin 
    <bean id="jobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
        <property name="jobClass" value="com.yunkouan.wms.common.quartz.AssisJob"/>
        <property name="group" value="group1"/>
@@ -224,8 +224,8 @@
    <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="jobDetail" />
         <property name="cronExpression" value="0/60 * * ? * *" />
-   </bean>
-   <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">  
+   </bean>-->
+   <!--bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">  
        <property name="dataSource" ref="dataSource" />
        <property name="autoStartup" value="true" />
        <property name="applicationContextSchedulerContextKey" value="applicationContext" />
@@ -237,13 +237,13 @@
                 <ref bean="cronTrigger" />
                 <ref bean="cronTrigger4InvLog" /> 
                 <ref bean="cronTrigger4Stock" /> 
-                <!-- <ref bean="cronTrigger4IssMessage" />  -->
+                < <ref bean="cronTrigger4IssMessage" />  
            </list>  
        </property>  
-   </bean>  
+   </bean>  -->
    <!-- 【哈尔滨】分布式定时任务调度end -->
 
-	<!-- 【库存日志备份】分布式定时任务调度begin -->
+	<!-- 【库存日志备份】分布式定时任务调度begin 
    <bean id="jobDetail4InvLog" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
        <property name="jobClass" value="com.yunkouan.wms.modules.intf.timer.InvLogBackupTask"/>
        <property name="group" value="group1"/>
@@ -252,11 +252,11 @@
    </bean>
    <bean id="cronTrigger4InvLog" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="jobDetail4InvLog" />
-        <property name="cronExpression" value="0 0 4 * * ?" /> <!-- [秒] [分] [小时] [日] [月] [周] [年] -->
-   </bean>
+        <property name="cronExpression" value="0 0 4 * * ?" /> <!-- [秒] [分] [小时] [日] [月] [周] [年]
+   </bean>-->
 	<!-- 【库存日志备份】分布式定时任务调度end -->
 
-	<!-- 【芜湖华东库存同步】分布式定时任务调度begin -->
+	<!-- 【芜湖华东库存同步】分布式定时任务调度begin 
    <bean id="jobDetail4Stock" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
        <property name="jobClass" value="com.yunkouan.wms.modules.intf.timer.QueryStockTask"/>
        <property name="group" value="group1"/>
@@ -265,8 +265,8 @@
    </bean>
    <bean id="cronTrigger4Stock" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="jobDetail4Stock" />
-        <property name="cronExpression" value="0 0 1 * * ?" /> <!-- [秒] [分] [小时] [日] [月] [周] [年] -->
-   </bean>
+        <property name="cronExpression" value="0 0 1 * * ?" /> <!-- [秒] [分] [小时] [日] [月] [周] [年]
+   </bean>-->
 	<!-- 【芜湖华东库存同步】分布式定时任务调度end -->
 	
 	<!-- 【查验线文件读取】分布式定时任务调度begin -->

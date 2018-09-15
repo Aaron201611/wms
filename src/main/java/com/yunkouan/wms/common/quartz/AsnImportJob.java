@@ -41,7 +41,7 @@ import jcifs.smb.SmbFile;
 * @author tphe06
 * @date 2018年8月24日 下午3:36:28  
 */
-@DisallowConcurrentExecution
+//@DisallowConcurrentExecution
 public class AsnImportJob extends QuartzJobBean {
 	private static Log log = LogFactory.getLog(AsnImportJob.class);
 

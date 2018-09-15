@@ -98,14 +98,12 @@ import com.yunkouan.wms.modules.send.entity.SendDeliveryMaterial;
 import com.yunkouan.wms.modules.send.entity.SendPick;
 import com.yunkouan.wms.modules.send.entity.SendPickDetail;
 import com.yunkouan.wms.modules.send.entity.SendPickLocation;
-import com.yunkouan.wms.modules.send.entity.SysExpressNoPool;
 import com.yunkouan.wms.modules.send.service.ICreatePickService;
 import com.yunkouan.wms.modules.send.service.IDeliveryService;
 import com.yunkouan.wms.modules.send.service.IPickDetailService;
 import com.yunkouan.wms.modules.send.service.IPickLocationService;
 import com.yunkouan.wms.modules.send.service.IPickService;
 import com.yunkouan.wms.modules.send.service.ISendDeliveryLogService;
-import com.yunkouan.wms.modules.send.service.ISysExpressNoPoolService;
 import com.yunkouan.wms.modules.send.service.IWaveService;
 import com.yunkouan.wms.modules.send.util.DeliverySplitUtil;
 import com.yunkouan.wms.modules.send.util.DeliveryUtils;
@@ -207,8 +205,8 @@ public class DeliveryServiceImpl extends BaseService implements IDeliveryService
 	@Autowired
 	private IUserService userService;
 
-	@Autowired
-	private ISysExpressNoPoolService expressPoolService;
+//	@Autowired
+//	private ISysExpressNoPoolService expressPoolService;
 	
 	@Autowired
 	private ISendDeliveryLogService deliveryLogService;
@@ -391,18 +389,7 @@ public class DeliveryServiceImpl extends BaseService implements IDeliveryService
 	@Transactional(rollbackFor=Exception.class)
 	public SendDeliveryVo update(SendDeliveryVo sdVo,String orgId,String wareHouseId,String operator) throws Exception{
 		if(sdVo == null ||sdVo.getSendDelivery() == null) return null;
-		//查询是否有关联的申请单
-//    	DeliverGoodsApplicationVo applicationVo = new DeliverGoodsApplicationVo(new DeliverGoodsApplication());
-//    	List<String> statusList = new ArrayList<String>();
-    	
-//    	statusList.add(String.valueOf(Constant.APPLICATION_STATUS_ALL_EXMINE));
-//    	statusList.add(String.valueOf(Constant.APPLICATION_STATUS_CANCAL));
-//    	applicationVo.setStatusNotIn(statusList);
-//    	applicationVo.getEntity().setDeliveryId(sdVo.getSendDelivery().getDeliveryId());
-//    	List<DeliverGoodsApplicationVo> qryList = deliverGoodsApplicationService.qryList(applicationVo);
-//    	if (qryList != null && !qryList.isEmpty()) {
-//    		throw new BizException("err_application_not_null");
-//    	}
+
 		//发货单是否打开状态
 		if(Constant.SEND_STATUS_OPEN != qryDeliveryStatus(sdVo.getSendDelivery().getDeliveryId()))
 			throw new BizException(BizStatus.SEND_DELIVERY_STATUS_IS_NOT_OPEN.getReasonPhrase());
@@ -773,17 +760,7 @@ public class DeliveryServiceImpl extends BaseService implements IDeliveryService
 	 */
 	public int enable(String deliveryId,String operator)throws Exception{
 		if(deliveryId == null) return 0;
-		//查询是否有关联的申请单
-//    	DeliverGoodsApplicationVo applicationVo = new DeliverGoodsApplicationVo(new DeliverGoodsApplication());
-//    	List<String> statusList = new ArrayList<String>();
-//    	statusList.add(String.valueOf(Constant.APPLICATION_STATUS_ALL_EXMINE));
-//    	statusList.add(String.valueOf(Constant.APPLICATION_STATUS_CANCAL));
-//    	applicationVo.setStatusNotIn(statusList);
-//    	applicationVo.getEntity().setDeliveryId(deliveryId);
-//    	List<DeliverGoodsApplicationVo> qryList = deliverGoodsApplicationService.qryList(applicationVo);
-//    	if (qryList != null && !qryList.isEmpty()) {
-//    		throw new BizException("err_application_not_null");
-//    	}
+
 		//1、检查发货单是否打开状态
 		checkStatus(deliveryId,Constant.SEND_STATUS_OPEN,BizStatus.SEND_DELIVERY_STATUS_IS_NOT_OPEN.getReasonPhrase());			
 		//查询发货单
@@ -917,16 +894,6 @@ public class DeliveryServiceImpl extends BaseService implements IDeliveryService
 	@Transactional(rollbackFor=Exception.class)
 	public int disableSendDelivery(String deliveryId,String orgId,String warehouseId,String operator)throws Exception{
 		if(deliveryId == null) return 0;
-		//查询是否有关联的申请单
-//    	DeliverGoodsApplicationVo applicationVo = new DeliverGoodsApplicationVo(new DeliverGoodsApplication());
-//    	List<String> statusList = new ArrayList<String>();
-//    	statusList.add(String.valueOf(Constant.APPLICATION_STATUS_CANCAL));
-//    	applicationVo.setStatusNotIn(statusList);
-//    	applicationVo.getEntity().setDeliveryId(deliveryId);
-//    	List<DeliverGoodsApplicationVo> qryList = deliverGoodsApplicationService.qryList(applicationVo);
-//    	if (qryList != null && !qryList.isEmpty()) {
-//    		throw new BizException("err_application_not_null");
-//    	}
 		//1、检查发货单是否生效状态
 		checkStatus(deliveryId,Constant.SEND_STATUS_ACTIVE,BizStatus.SEND_DELIVERY_STATUS_IS_NOT_ACTIVE.getReasonPhrase());
 		
@@ -1943,6 +1910,7 @@ public class DeliveryServiceImpl extends BaseService implements IDeliveryService
 	 * @return
 	 * @throws Exception
 	 */
+	@Deprecated
 	@Transactional(rollbackFor=Exception.class)
 	public DeliverGoodsApplicationVo addApplicationVo(DeliverGoodsApplicationVo applicationVo) throws Exception{
 		Principal p = LoginUtil.getLoginUser();
@@ -2100,7 +2068,7 @@ public class DeliveryServiceImpl extends BaseService implements IDeliveryService
 		//查询辅材
 		sendDeliveryVo = qryMaterialList(sendDeliveryVo);
 		//运单号发送物流公司及erp
-		send2ErpAndSaveStatus(sendDeliveryVo);
+//		send2ErpAndSaveStatus(sendDeliveryVo);
 		
 		return sendDeliveryVo;
 	}
@@ -2987,44 +2955,44 @@ public class DeliveryServiceImpl extends BaseService implements IDeliveryService
 	 * 运单号发送到物流公司及erp
 	 * @param deliveryVo
 	 */
-	public void send2ErpAndSaveStatus(SendDeliveryVo deliveryVo){
-		Thread thread = new Thread(new Runnable() {
-			public void run() {
-				//同步ERP
-				try {
-					ErpResult erpResult = context.getStrategy4Erp().sendToERP(deliveryVo, "",Constant.CONFIRM_RETURN);
-					if(erpResult!=null && erpResult.getCode()==1){//成功
-						updateSendStatus(deliveryVo.getSendDelivery().getDeliveryId(),3);
-					}else{
-						if(log.isErrorEnabled()) log.error(erpResult.getMessage());
-					}
-				} catch (Exception e) {
-					if(log.isErrorEnabled()) log.error(e.getMessage(), e);
-				}
-			}
-		});
-		ThreadPoolUtils.getInstance().addThreadItem(thread);
-	}
+//	public void send2ErpAndSaveStatus(SendDeliveryVo deliveryVo){
+//		Thread thread = new Thread(new Runnable() {
+//			public void run() {
+//				//同步ERP
+//				try {
+//					ErpResult erpResult = context.getStrategy4Erp().sendToERP(deliveryVo, "",Constant.CONFIRM_RETURN);
+//					if(erpResult!=null && erpResult.getCode()==1){//成功
+//						updateSendStatus(deliveryVo.getSendDelivery().getDeliveryId(),3);
+//					}else{
+//						if(log.isErrorEnabled()) log.error(erpResult.getMessage());
+//					}
+//				} catch (Exception e) {
+//					if(log.isErrorEnabled()) log.error(e.getMessage(), e);
+//				}
+//			}
+//		});
+//		ThreadPoolUtils.getInstance().addThreadItem(thread);
+//	}
 	
 	/**
 	 * 发送订单拦截结果
 	 * @param deliveryVo
 	 */
-	public void interceptAndSend2ERP(SendDeliveryVo deliveryVo){
-		Thread thread = new Thread(new Runnable() {
-			public void run() {
-				//同步ERP
-				try {
-					String remark = paramService.getValue(CacheName.SEND_INTERCEPT_STATUS, deliveryVo.getSendDelivery().getInterceptStatus());
-					ErpResult erpResult = context.getStrategy4Erp().sendToERP(deliveryVo, remark,Constant.INTECEPT_RETURN);
-					if(erpResult != null) if(log.isInfoEnabled()) log.info(erpResult.getMessage());
-				} catch (Exception e) {
-					if(log.isErrorEnabled()) log.error(e.getMessage(), e);
-				}
-			}
-		});
-		ThreadPoolUtils.getInstance().addThreadItem(thread);
-	}
+//	public void interceptAndSend2ERP(SendDeliveryVo deliveryVo){
+//		Thread thread = new Thread(new Runnable() {
+//			public void run() {
+//				//同步ERP
+//				try {
+//					String remark = paramService.getValue(CacheName.SEND_INTERCEPT_STATUS, deliveryVo.getSendDelivery().getInterceptStatus());
+//					ErpResult erpResult = context.getStrategy4Erp().sendToERP(deliveryVo, remark,Constant.INTECEPT_RETURN);
+//					if(erpResult != null) if(log.isInfoEnabled()) log.info(erpResult.getMessage());
+//				} catch (Exception e) {
+//					if(log.isErrorEnabled()) log.error(e.getMessage(), e);
+//				}
+//			}
+//		});
+//		ThreadPoolUtils.getInstance().addThreadItem(thread);
+//	}
 
 	@Override
 	public int updateSendStatus(String deliveryId, int sendStatus, String bigchar, String gather_place) {
@@ -3265,7 +3233,7 @@ public class DeliveryServiceImpl extends BaseService implements IDeliveryService
 //			}
 //		}
 		//把退货确认结果发送给ERP
-		send2ErpAndSaveStatus(view(id));
+//		send2ErpAndSaveStatus(view(id));
 		return true;
 	}
 	

@@ -164,6 +164,13 @@ public class ASNController extends BaseController {
         rm.setObj(recAsnVO);
         return rm;
     }
+    
+    /**
+     * 收货单拦截
+     * @param poNo
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(value = "/orderInterception", method = RequestMethod.POST)
  	@ResponseBody
     public ResultModel orderInterception( @RequestBody String poNo ) throws Exception {
@@ -306,11 +313,11 @@ public class ASNController extends BaseController {
     	this.asnService.complete(recAsnVO);
 //    	asnService.updateERPInventory(recAsnVO);
     	ResultModel rm = new ResultModel();
-    	ErpResult result = asnService.updateERPInventory(recAsnVO);
-    	if(result.getCode() != 1){
-    		rm.setError();
-    		rm.addMessage("收货成功，发送ERP异常："+result.getMessage()+",请手工重发！");
-    	}
+//    	ErpResult result = asnService.updateERPInventory(recAsnVO);
+//    	if(result.getCode() != 1){
+//    		rm.setError();
+//    		rm.addMessage("收货成功，发送ERP异常："+result.getMessage()+",请手工重发！");
+//    	}
     	return rm;
     }
     
@@ -320,23 +327,23 @@ public class ASNController extends BaseController {
      * @return
      * @throws Exception
      */
-    @OpLog(model = OpLog.MODEL_WAREHOUSE_ASN, type = "收货确认同步erp", pos = 0)
-    @RequestMapping(value = "/updateERPInventory", method = RequestMethod.POST)
- 	@ResponseBody
-    public ResultModel updateERPInventory(@RequestBody String id) throws Exception{
-    	RecAsnVO _recAsnVO = asnService.view(id);
-    	//若已同步成功，则不再提交
-    	if(Constant.ASN_HASSYNC_STATUS == _recAsnVO.getAsn().getSyncErpStatus()){
-    		ResultModel rm = new ResultModel();
-        	return rm;
-    	}
-    	ErpResult result = asnService.updateERPInventory(_recAsnVO);
-    	if(result.getCode() != 1){
-    		throw new BizException("SYC_ERP_ERR",result.getMessage());
-    	}
-    	ResultModel rm = new ResultModel();
-    	return rm;
-    }
+//    @OpLog(model = OpLog.MODEL_WAREHOUSE_ASN, type = "收货确认同步erp", pos = 0)
+//    @RequestMapping(value = "/updateERPInventory", method = RequestMethod.POST)
+// 	@ResponseBody
+//    public ResultModel updateERPInventory(@RequestBody String id) throws Exception{
+//    	RecAsnVO _recAsnVO = asnService.view(id);
+//    	//若已同步成功，则不再提交
+//    	if(Constant.ASN_HASSYNC_STATUS == _recAsnVO.getAsn().getSyncErpStatus()){
+//    		ResultModel rm = new ResultModel();
+//        	return rm;
+//    	}
+//    	ErpResult result = asnService.updateERPInventory(_recAsnVO);
+//    	if(result.getCode() != 1){
+//    		throw new BizException("SYC_ERP_ERR",result.getMessage());
+//    	}
+//    	ResultModel rm = new ResultModel();
+//    	return rm;
+//    }
     /**
      * ASN单整单收货确认并自动生成上架单
      * @param recAsnVO
@@ -355,16 +362,16 @@ public class ASNController extends BaseController {
     	ResultModel rm = new ResultModel();
     	
     	//异步发送ERP
-    	Thread thread = new Thread(new Runnable() {
-			public void run() {
-				try {
-					ErpResult result = asnService.updateERPInventory(recAsnVO);
-				} catch (Exception e) {
-					log.error("发送ERP异常："+e.getMessage());
-				}
-			}
-		});
-    	ThreadPoolUtils.getInstance().addThreadItem(thread);
+//    	Thread thread = new Thread(new Runnable() {
+//			public void run() {
+//				try {
+//					ErpResult result = asnService.updateERPInventory(recAsnVO);
+//				} catch (Exception e) {
+//					log.error("发送ERP异常："+e.getMessage());
+//				}
+//			}
+//		});
+//    	ThreadPoolUtils.getInstance().addThreadItem(thread);
 //    	
 //    	try {
 //			ErpResult result = asnService.updateERPInventory(recAsnVO);
@@ -413,16 +420,16 @@ public class ASNController extends BaseController {
     			asnVO.setListAsnDetailVO(listAsnDetailVO);
     		}
         	//异步发送ERP
-        	Thread thread = new Thread(new Runnable() {
-    			public void run() {
-    				try {
-    					ErpResult result = asnService.updateERPInventory(recAsnVO);
-    				} catch (Exception e) {
-    					log.error("发送ERP异常："+e.getMessage());
-    				}
-    			}
-    		});
-        	ThreadPoolUtils.getInstance().addThreadItem(thread);
+//        	Thread thread = new Thread(new Runnable() {
+//    			public void run() {
+//    				try {
+//    					ErpResult result = asnService.updateERPInventory(recAsnVO);
+//    				} catch (Exception e) {
+//    					log.error("发送ERP异常："+e.getMessage());
+//    				}
+//    			}
+//    		});
+//        	ThreadPoolUtils.getInstance().addThreadItem(thread);
 //    		ErpResult result = asnService.updateERPInventory(recAsnVO);
 //        	if(result.getCode() != 1){
 //        		rm.setError();
@@ -574,15 +581,15 @@ public class ASNController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/batchSyncInstockData", method = RequestMethod.POST)
-	@ResponseBody
-	public ResultModel batchSyncInstockData(@RequestBody RecAsnVO asnVO)throws Exception {
-		if(asnVO == null) 
-			throw new BizException("data_is_null");		
-		this.asnService.batchSyncInstockData(asnVO.getListAsnId());
-		ResultModel rm = new ResultModel();
-		return rm;
-	}
+//	@RequestMapping(value = "/batchSyncInstockData", method = RequestMethod.POST)
+//	@ResponseBody
+//	public ResultModel batchSyncInstockData(@RequestBody RecAsnVO asnVO)throws Exception {
+//		if(asnVO == null) 
+//			throw new BizException("data_is_null");		
+//		this.asnService.batchSyncInstockData(asnVO.getListAsnId());
+//		ResultModel rm = new ResultModel();
+//		return rm;
+//	}
 	
     /**
      * 推送入库数据
@@ -595,13 +602,13 @@ public class ASNController extends BaseController {
      * @version 2017年3月7日 下午5:28:38<br/>
      * @author hgx<br/>
      */
-    @RequestMapping(value = "/transmitInstock", method = RequestMethod.POST)
- 	@ResponseBody
-    public ResultModel transmitInstock( @RequestBody String id ) throws Exception {
-    	ResultModel rm = new ResultModel();
-    	this.asnService.transmitInstockXML(id);
-    	return rm;
-    }
+//    @RequestMapping(value = "/transmitInstock", method = RequestMethod.POST)
+// 	@ResponseBody
+//    public ResultModel transmitInstock( @RequestBody String id ) throws Exception {
+//    	ResultModel rm = new ResultModel();
+//    	this.asnService.transmitInstockXML(id);
+//    	return rm;
+//    }
     
     /**
      * 生成申请单
@@ -611,30 +618,30 @@ public class ASNController extends BaseController {
      * @author hgx<br/>
      * @throws Exception 
      */
-    @RequestMapping(value = "/createApplication", method = RequestMethod.POST)
- 	@ResponseBody
-    public ResultModel createApplication( @RequestBody String asnId ) throws Exception {
-    	
-		//获取登录用户
-		Principal p = LoginUtil.getLoginUser();	
-		//查询是否有关联的申请单
-    	DeliverGoodsApplicationVo applicationVo = new DeliverGoodsApplicationVo(new DeliverGoodsApplication());
-    	List<String> statusList = new ArrayList<String>();
-    	statusList.add(String.valueOf(Constant.APPLICATION_STATUS_CANCAL));
-    	applicationVo.setStatusNotIn(statusList);
-    	applicationVo.getEntity().setAsnId(asnId);
-    	List<DeliverGoodsApplicationVo> qryList = applicationService.qryList(applicationVo);
-    	if (qryList != null && !qryList.isEmpty()) {
-    		throw new BizException("err_application_not_null");
-    	}
-        RecAsnVO recAsnVO = this.asnService.view(asnId);
-        if ( recAsnVO.getAsn().getAsnStatus() == null || Constant.ASN_STATUS_OPEN != recAsnVO.getAsn().getAsnStatus() ) {
-    		throw new BizException("err_rec_asn_update_statusNotOpen");
-    	}
-        applicationService.createApplicationFromAsn(recAsnVO, p);
-        ResultModel rm = new ResultModel();
-        return rm;
-    }
+//    @RequestMapping(value = "/createApplication", method = RequestMethod.POST)
+// 	@ResponseBody
+//    public ResultModel createApplication( @RequestBody String asnId ) throws Exception {
+//    	
+//		//获取登录用户
+//		Principal p = LoginUtil.getLoginUser();	
+//		//查询是否有关联的申请单
+//    	DeliverGoodsApplicationVo applicationVo = new DeliverGoodsApplicationVo(new DeliverGoodsApplication());
+//    	List<String> statusList = new ArrayList<String>();
+//    	statusList.add(String.valueOf(Constant.APPLICATION_STATUS_CANCAL));
+//    	applicationVo.setStatusNotIn(statusList);
+//    	applicationVo.getEntity().setAsnId(asnId);
+//    	List<DeliverGoodsApplicationVo> qryList = applicationService.qryList(applicationVo);
+//    	if (qryList != null && !qryList.isEmpty()) {
+//    		throw new BizException("err_application_not_null");
+//    	}
+//        RecAsnVO recAsnVO = this.asnService.view(asnId);
+//        if ( recAsnVO.getAsn().getAsnStatus() == null || Constant.ASN_STATUS_OPEN != recAsnVO.getAsn().getAsnStatus() ) {
+//    		throw new BizException("err_rec_asn_update_statusNotOpen");
+//    	}
+//        applicationService.createApplicationFromAsn(recAsnVO, p);
+//        ResultModel rm = new ResultModel();
+//        return rm;
+//    }
     
     public static void main(String[] args) {
 //    	String dStr = "2017/02/03";

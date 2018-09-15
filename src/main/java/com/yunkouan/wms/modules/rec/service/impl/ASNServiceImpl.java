@@ -115,7 +115,6 @@ import com.yunkouan.wms.modules.ts.service.ITaskService;
  * @author andy wang<br/>
  */
 @Service
-@Transactional(readOnly=false,rollbackFor=Exception.class)
 public class ASNServiceImpl extends BaseService implements IASNService {
 	/** 日志对象 <br/> add by andy wang */
 	private Logger log = LoggerFactory.getLogger(Constant.LOG_SERVICE);
@@ -186,8 +185,8 @@ public class ASNServiceImpl extends BaseService implements IASNService {
 	@Autowired
 	private IPutawayService ptwServie;
 	
-	@Autowired
-	private IMsmqMessageService msmqMessageService;
+//	@Autowired
+//	private IMsmqMessageService msmqMessageService;
     /* method *******************************************************/
 	
 	@Autowired
@@ -1008,53 +1007,54 @@ public class ASNServiceImpl extends BaseService implements IASNService {
 	 * @param _recAsnVo
 	 * @throws Exception
 	 */
-	public ErpResult updateERPInventory(RecAsnVO _recAsnVo){
-		//设置上送参数
-		List<Map<String,String>> goodsList = new ArrayList<Map<String,String>>();
-		if(_recAsnVo!= null && _recAsnVo.getListAsnDetailVO() != null && !_recAsnVo.getListAsnDetailVO().isEmpty()){
-			for(RecAsnDetailVO asnDetailVo:_recAsnVo.getListAsnDetailVO()){
-				if(!StringUtil.isTrimEmpty(asnDetailVo.getAsnDetail().getSkuId())){
-					Map<String,String> skuMap = new HashMap<String,String>();
-					//查询货品
-					MetaSku sku = skuDao.selectByPrimaryKey(asnDetailVo.getAsnDetail().getSkuId());
-					skuMap.put("hg_goods_no", sku.getSkuNo());
-					skuMap.put("qty",asnDetailVo.getAsnDetail().getReceiveQty()+"");
-					int quality = 1;
-					if(Constant.STOCK_SKU_STATUS_ABNORMAL == asnDetailVo.getAsnDetail().getSkuStatus()) quality = 0;
-					skuMap.put("quality",quality+"");
-					goodsList.add(skuMap);
-				}
-			}
-		}
-		String goods = JsonUtil.toJson(goodsList);
-		Map<String,String> paramMap = new HashMap<String,String>();
-		paramMap.put("inventory_no", _recAsnVo.getAsn().getPoNo());
-		paramMap.put("goods", goods);
-		paramMap.put("notify_time",new Date().getTime()+"");
-		ErpResult result = new ErpResult();
-		try {
-			result = context.getStrategy4Erp().doInvoke(Constant.ERP_UPDATEINVENTORY,paramMap);
-			//若同步失败，则asn单同步状态设为0
-			Principal loginUser = LoginUtil.getLoginUser();
-			RecAsn asn = new RecAsn();
-			asn.setAsnId(_recAsnVo.getAsn().getAsnId());
-			asn.setUpdatePerson(loginUser.getUserId());	
-			if(result.getCode() != 1){
-				asn.setSyncErpStatus(Constant.ASN_UNSYNC_STATUS);
-			} else{
-				asn.setSyncErpStatus(Constant.ASN_HASSYNC_STATUS);
-			}
-			asnDao.updateByPrimaryKeySelective(asn);
-			//同步成功，则asn单同步状态为1
-		} catch (Exception e) {
-			if(log.isErrorEnabled()) log.error(e.getMessage());
-//			resMap.put("code", -1);
-//			resMap.put("message", "SocketTimeoutException");
-			if(log.isErrorEnabled()) log.error(e.getMessage(), e);
-			throw new BizException("valid_rec_erp_error");
-		}
-		return result;
-	}
+    @Deprecated
+//	public ErpResult updateERPInventory(RecAsnVO _recAsnVo){
+//		//设置上送参数
+//		List<Map<String,String>> goodsList = new ArrayList<Map<String,String>>();
+//		if(_recAsnVo!= null && _recAsnVo.getListAsnDetailVO() != null && !_recAsnVo.getListAsnDetailVO().isEmpty()){
+//			for(RecAsnDetailVO asnDetailVo:_recAsnVo.getListAsnDetailVO()){
+//				if(!StringUtil.isTrimEmpty(asnDetailVo.getAsnDetail().getSkuId())){
+//					Map<String,String> skuMap = new HashMap<String,String>();
+//					//查询货品
+//					MetaSku sku = skuDao.selectByPrimaryKey(asnDetailVo.getAsnDetail().getSkuId());
+//					skuMap.put("hg_goods_no", sku.getSkuNo());
+//					skuMap.put("qty",asnDetailVo.getAsnDetail().getReceiveQty()+"");
+//					int quality = 1;
+//					if(Constant.STOCK_SKU_STATUS_ABNORMAL == asnDetailVo.getAsnDetail().getSkuStatus()) quality = 0;
+//					skuMap.put("quality",quality+"");
+//					goodsList.add(skuMap);
+//				}
+//			}
+//		}
+//		String goods = JsonUtil.toJson(goodsList);
+//		Map<String,String> paramMap = new HashMap<String,String>();
+//		paramMap.put("inventory_no", _recAsnVo.getAsn().getPoNo());
+//		paramMap.put("goods", goods);
+//		paramMap.put("notify_time",new Date().getTime()+"");
+//		ErpResult result = new ErpResult();
+//		try {
+//			result = context.getStrategy4Erp().doInvoke(Constant.ERP_UPDATEINVENTORY,paramMap);
+//			//若同步失败，则asn单同步状态设为0
+//			Principal loginUser = LoginUtil.getLoginUser();
+//			RecAsn asn = new RecAsn();
+//			asn.setAsnId(_recAsnVo.getAsn().getAsnId());
+//			asn.setUpdatePerson(loginUser.getUserId());	
+//			if(result.getCode() != 1){
+//				asn.setSyncErpStatus(Constant.ASN_UNSYNC_STATUS);
+//			} else{
+//				asn.setSyncErpStatus(Constant.ASN_HASSYNC_STATUS);
+//			}
+//			asnDao.updateByPrimaryKeySelective(asn);
+//			//同步成功，则asn单同步状态为1
+//		} catch (Exception e) {
+//			if(log.isErrorEnabled()) log.error(e.getMessage());
+////			resMap.put("code", -1);
+////			resMap.put("message", "SocketTimeoutException");
+//			if(log.isErrorEnabled()) log.error(e.getMessage(), e);
+//			throw new BizException("valid_rec_erp_error");
+//		}
+//		return result;
+//	}
 	
     /**
 	 * 查询ASN单列表
@@ -1474,26 +1474,6 @@ public class ASNServiceImpl extends BaseService implements IASNService {
 			throw new BizException(err.replaceFirst("\\{", "").replaceFirst("\\}", ""));
 		}
 		RecAsnVO record = add(_recAsnVO);
-		//获取登录用户
-//		Principal p = LoginUtil.getLoginUser();
-//		if(p != null){
-//			//获取仓库
-//			MetaWarehouseVO warehouseVo = warehouseService.viewWrh(p.getWarehouseId());
-//			
-//			if(_recAsnVO.getApplicationVo() != null 
-//					&& warehouseVo.getWarehouse().getWarehouseType().intValue() == Constant.WAREHOUSE_TYPE_NOTCUSTOMS){
-//				//若是普通仓，则自动生成申请单
-//				_recAsnVO.getApplicationVo().getEntity().setAsnId(record.getAsn().getAsnId());
-//				DeliverGoodsApplicationVo applicationVo = addApplicationVo(_recAsnVO.getApplicationVo());
-//				
-//				//更新asn单的申请单号
-//				RecAsn asn = new RecAsn();
-//				asn.setAsnId(record.getAsn().getAsnId());
-//				asn.setGatejobNo(applicationVo.getEntity().getApplicationNo());
-//				asnDao.updateByPrimaryKeySelective(asn);
-//			}
-//		}
-
 		
 		return record;
     }
@@ -1504,32 +1484,33 @@ public class ASNServiceImpl extends BaseService implements IASNService {
 	 * @return
 	 * @throws Exception
 	 */
-	@Transactional(rollbackFor=Exception.class)
-	public DeliverGoodsApplicationVo addApplicationVo(DeliverGoodsApplicationVo applicationVo) throws Exception{
-		Principal p = LoginUtil.getLoginUser();
-		MetaWarehouseVO warehouseVo = warehouseService.viewWrh(LoginUtil.getWareHouseId());
-		if(warehouseVo.getWarehouse().getWarehouseType().intValue() == Constant.WAREHOUSE_TYPE_NOTCUSTOMS){
-			String i_flag = paramService.getKey(CacheName.APPLY_I_FLAG);
-			applicationVo.getEntity().setiEFlag(i_flag);
-			//查询skuId
-			if(applicationVo.getApplicationGoodVoList() != null && !applicationVo.getApplicationGoodVoList().isEmpty()){
-				for(DeliverGoodsApplicationGoodVo goodVo:applicationVo.getApplicationGoodVoList()){
-					if(goodVo.getApplicationGoodSkuVoList() != null && !goodVo.getApplicationGoodSkuVoList().isEmpty()){
-						for(DeliverGoodsApplicationGoodsSkuVo goodSkuVo:goodVo.getApplicationGoodSkuVoList()){
-							MetaSku p_sku = new MetaSku();
-							p_sku.setHgGoodsNo(goodSkuVo.getEntity().getHgGoodsNo());
-							p_sku.setOrgId(p.getOrgId());
-							p_sku.setWarehouseId(LoginUtil.getWareHouseId());
-							MetaSku sku = skuService.query(p_sku);
-							goodSkuVo.getEntity().setSkuId(sku.getSkuId());
-						}//for
-					}//if
-				}//for
-			}//if
-			applicationVo = deliverGoodsApplicationService.add(applicationVo, p);
-		}
-		return applicationVo;
-	}
+//    @Deprecated
+//	@Transactional(rollbackFor=Exception.class)
+//	public DeliverGoodsApplicationVo addApplicationVo(DeliverGoodsApplicationVo applicationVo) throws Exception{
+//		Principal p = LoginUtil.getLoginUser();
+//		MetaWarehouseVO warehouseVo = warehouseService.viewWrh(LoginUtil.getWareHouseId());
+//		if(warehouseVo.getWarehouse().getWarehouseType().intValue() == Constant.WAREHOUSE_TYPE_NOTCUSTOMS){
+//			String i_flag = paramService.getKey(CacheName.APPLY_I_FLAG);
+//			applicationVo.getEntity().setiEFlag(i_flag);
+//			//查询skuId
+//			if(applicationVo.getApplicationGoodVoList() != null && !applicationVo.getApplicationGoodVoList().isEmpty()){
+//				for(DeliverGoodsApplicationGoodVo goodVo:applicationVo.getApplicationGoodVoList()){
+//					if(goodVo.getApplicationGoodSkuVoList() != null && !goodVo.getApplicationGoodSkuVoList().isEmpty()){
+//						for(DeliverGoodsApplicationGoodsSkuVo goodSkuVo:goodVo.getApplicationGoodSkuVoList()){
+//							MetaSku p_sku = new MetaSku();
+//							p_sku.setHgGoodsNo(goodSkuVo.getEntity().getHgGoodsNo());
+//							p_sku.setOrgId(p.getOrgId());
+//							p_sku.setWarehouseId(LoginUtil.getWareHouseId());
+//							MetaSku sku = skuService.query(p_sku);
+//							goodSkuVo.getEntity().setSkuId(sku.getSkuId());
+//						}//for
+//					}//if
+//				}//for
+//			}//if
+//			applicationVo = deliverGoodsApplicationService.add(applicationVo, p);
+//		}
+//		return applicationVo;
+//	}
 
 	/**
 	 * 根据ASN单明细项，组合货品唯一key值
@@ -1687,17 +1668,6 @@ public class ASNServiceImpl extends BaseService implements IASNService {
         	if ( recAsn.getAsnStatus() == null || Constant.ASN_STATUS_OPEN != recAsn.getAsnStatus() ) {
         		throw new BizException("err_rec_asn_cancel_statusNotOpen");
         	}
-        	//查询是否有关联的申请单
-//        	DeliverGoodsApplicationVo applicationVo = new DeliverGoodsApplicationVo(new DeliverGoodsApplication());
-//        	List<String> statusList = new ArrayList<String>();
-//        	statusList.add(String.valueOf(Constant.APPLICATION_STATUS_CANCAL));
-//        	applicationVo.setStatusNotIn(statusList);
-//        	applicationVo.getEntity().setAsnId(recAsn.getAsnId());
-//        	List<DeliverGoodsApplicationVo> qryList = deliverGoodsApplicationService.qryList(applicationVo);
-//        	
-//        	if (qryList != null && !qryList.isEmpty()) {
-//        		throw new BizException("err_application_not_null");
-//        	}
         	
         	// 更新状态
         	this.asnExtlService.updateAsnStatusById(param_asnId, Constant.ASN_STATUS_CANCEL);
@@ -1965,134 +1935,134 @@ public class ASNServiceImpl extends BaseService implements IASNService {
 	 * @param warehouseIdList
 	 * @throws Exception
 	 */
-	public void findAndSendInStockData(List<String> warehouseIdList)throws Exception{
-		//查询所有完成上架的订单
-		RecAsnVO asnVo = new RecAsnVO();
-		asnVo.setWarehouseIdList(warehouseIdList);
-		asnVo.getAsn().setAsnStatus(Constant.ASN_STATUS_PUTAWAY);
-		
-		List<RecAsn> list = asnDao.selectByExample(asnVo.getExample());
-		List<String> asnIdList = list.stream().map(t->t.getAsnId()).collect(Collectors.toList());
-		
-		//批量同步入库数据
-		batchSyncInstockData(asnIdList);
-	}
+//	public void findAndSendInStockData(List<String> warehouseIdList)throws Exception{
+//		//查询所有完成上架的订单
+//		RecAsnVO asnVo = new RecAsnVO();
+//		asnVo.setWarehouseIdList(warehouseIdList);
+//		asnVo.getAsn().setAsnStatus(Constant.ASN_STATUS_PUTAWAY);
+//		
+//		List<RecAsn> list = asnDao.selectByExample(asnVo.getExample());
+//		List<String> asnIdList = list.stream().map(t->t.getAsnId()).collect(Collectors.toList());
+//		
+//		//批量同步入库数据
+//		batchSyncInstockData(asnIdList);
+//	}
 	
 	/**
 	 * 批量同步入库数据
 	 * @param idList
 	 * @throws Exception
 	 */
-	public void batchSyncInstockData(List<String> idList) throws Exception{
-		if(idList == null || idList.isEmpty()) return;
-		for(String asnId:idList){
-			transmitInstockXML(asnId);
-		}
-	}
+//	public void batchSyncInstockData(List<String> idList) throws Exception{
+//		if(idList == null || idList.isEmpty()) return;
+//		for(String asnId:idList){
+//			transmitInstockXML(asnId);
+//		}
+//	}
 	
 	/**
 	 * 传送入库数据对接仓储企业联网监管系统
 	 * @throws Exception
 	 */
-	public void transmitInstockXML(String asnId) throws Exception{
-		
-		Principal loginUser = LoginUtil.getLoginUser();
-		
-		String messsageId = IdUtil.getUUID();
-		String emsNo = paramService.getKey(CacheName.EMS_NO);
-		String sendId = paramService.getKey(CacheName.TRAED_CODE);
-		String receiveId = paramService.getKey(CacheName.CUSTOM_CODE);
-		String sendChnalName = paramService.getKey(CacheName.MSMQ_SEND_CHNALNAME);
-		String label = paramService.getKey(CacheName.PARAM_MESSAGE_LABEL);
-		String in_stock_type = paramService.getKey(CacheName.TYPE_INSTOCK_NONBOND);
-		String messageType = paramService.getKey(CacheName.MSMQ_MESSAGE_TYPE_INOUTSTOCK);
-		Date today = new Date();
-		String dateTime = DateFormatUtils.format(today, "yyyy-MM-dd HH:mm:ss").replaceAll(" ", "T");
-		String date = DateFormatUtils.format(today, "yyyy-MM-dd");
-		//查询asn单信息
-		RecAsnVO asnVo = view(asnId);
-		if(asnVo == null) throw new BizException("err_rec_asn_null");
-		if(asnVo.getListAsnDetailVO() == null || asnVo.getListAsnDetailVO().isEmpty()) 
-			throw new BizException("err_rec_asnDetail_null");
-		//检查是否全部上架状态
-		if(Constant.ASN_STATUS_PUTAWAY != asnVo.getAsn().getAsnStatus().intValue()){
-			throw new BizException("err_rec_asn_trans_statusNotputaway");
-		}
-		//创建入库报文
-		MSMQ msmq = new MSMQ();
-		//报文头参数
-		Head head = new Head();
-		head.setMESSAGE_ID(messsageId);
-		head.setMESSAGE_TYPE(messageType);
-		head.setEMS_NO(emsNo);
-		head.setFUNCTION_CODE("A");//功能代码 新增
-		head.setMESSAGE_DATE(dateTime);
-		head.setSENDER_ID(sendId);
-		head.setRECEIVER_ID(receiveId);
-		head.setSEND_TYPE("0");
-		msmq.setHead(head);
-		//报文体
-		List<Map<String,String>> mapList = new ArrayList<Map<String,String>>();
-		for(RecAsnDetailVO asnDetailVo:asnVo.getListAsnDetailVO()){
-			MetaMerchant owner = FqDataUtils.getMerchantById(merchantService, asnDetailVo.getSku().getOwner());
-			Map<String,String> map = new HashMap<String,String>();
-			for(RecPutawayLocationVO putawayLocationVo:asnDetailVo.getListPtwLocVO()){
-				map.put("MESSAGE_ID", messsageId);
-				map.put("EMS_NO", emsNo);
-				map.put("IO_NO",asnVo.getAsn().getAsnNo());
-				map.put("GOODS_NATURE", asnDetailVo.getSku().getGoodsNature()==null?"":asnDetailVo.getSku().getGoodsNature()+"");
-				map.put("IO_DATE", date);
-				map.put("COP_G_NO", StringUtil.isBlank(asnDetailVo.getSku().getHgGoodsNo())?asnDetailVo.getSku().getSkuNo():asnDetailVo.getSku().getHgGoodsNo());
-				map.put("G_NO", asnDetailVo.getSku().getgNo());
-				map.put("HSCODE", asnDetailVo.getSku().getHsCode());
-				map.put("GNAME", asnDetailVo.getSku().getSkuName());
-				map.put("GMODEL", asnDetailVo.getSku().getSpecModel());
-				map.put("CURR", asnDetailVo.getSku().getCurr());
-				map.put("COUNTRY", asnDetailVo.getSku().getOriginCountry());
-				map.put("QTY", putawayLocationVo.getPutawayLocation().getPutawayQty().toString());
-				map.put("UNIT", asnDetailVo.getSku().getMeasureUnit());
-				map.put("TYPE", in_stock_type);
-				map.put("CHK_CODE", "01");
-				map.put("GATEJOB_NO", asnVo.getAsn().getGatejobNo());
-				map.put("WHS_CODE", asnVo.getWarehouseNo());
-				map.put("LOCATION_CODE", putawayLocationVo.getLocationComment());
-				map.put("OWNER_CODE", owner.getHgMerchantNo());
-				map.put("OWNER_NAME", owner.getMerchantName());
-			}
-			mapList.add(map);
-		}
-		msmq.setBodyMaps(mapList);
-		//创建入库报文
-		TransmitXmlUtil tranUtil = new TransmitXmlUtil(msmq);
-		String xmlStr = tranUtil.formXml();
-		if(log.isInfoEnabled()) log.info("MSMQ_Message_"+messsageId+"_入库数据报文：["+xmlStr+"]");
-		
-		//传送入库数据到仓储企业联网监管系统
-		boolean result = false;
-		if(log.isInfoEnabled()) log.info("Queue名称：["+sendChnalName+"]");
-		result = MSMQUtil.send(sendChnalName, label, xmlStr, messsageId.getBytes());
-		if(log.isInfoEnabled()) log.info("MSMQ_Message_"+messsageId+"_入库发送接口运行结果：["+result+"]");	
-		
-		//保存报文
-		MsmqMessageVo messageVo = new MsmqMessageVo();
-		messageVo.getEntity().setMessageId(messsageId);
-		messageVo.getEntity().setFunctionType(Constant.FUNCTION_TYPE_ASN);
-		messageVo.getEntity().setOrderNo(asnId);
-		messageVo.getEntity().setContent(xmlStr);
-		messageVo.getEntity().setSender(Constant.SYSTEM_TYPE_WMS);
-		messageVo.getEntity().setSendTime(new Date());
-		messageVo.getEntity().setCreatePerson(loginUser.getUserId());
-		messageVo.getEntity().setOrgId(loginUser.getOrgId());
-		messageVo.getEntity().setWarehouseId(LoginUtil.getWareHouseId());
-		msmqMessageService.add(messageVo);
-		
-		//修改asn单发送状态
-		if(result){
-			asnVo.getAsn().setTransStatus(Constant.SYNCSTOCK_STATUS_SEND_SUCCESS);
-			asnVo.getAsn().setUpdatePerson(loginUser.getUserId());
-			asnDao.updateByPrimaryKeySelective(asnVo.getAsn());
-		}
-	}
+//	public void transmitInstockXML(String asnId) throws Exception{
+//		
+//		Principal loginUser = LoginUtil.getLoginUser();
+//		
+//		String messsageId = IdUtil.getUUID();
+//		String emsNo = paramService.getKey(CacheName.EMS_NO);
+//		String sendId = paramService.getKey(CacheName.TRAED_CODE);
+//		String receiveId = paramService.getKey(CacheName.CUSTOM_CODE);
+//		String sendChnalName = paramService.getKey(CacheName.MSMQ_SEND_CHNALNAME);
+//		String label = paramService.getKey(CacheName.PARAM_MESSAGE_LABEL);
+//		String in_stock_type = paramService.getKey(CacheName.TYPE_INSTOCK_NONBOND);
+//		String messageType = paramService.getKey(CacheName.MSMQ_MESSAGE_TYPE_INOUTSTOCK);
+//		Date today = new Date();
+//		String dateTime = DateFormatUtils.format(today, "yyyy-MM-dd HH:mm:ss").replaceAll(" ", "T");
+//		String date = DateFormatUtils.format(today, "yyyy-MM-dd");
+//		//查询asn单信息
+//		RecAsnVO asnVo = view(asnId);
+//		if(asnVo == null) throw new BizException("err_rec_asn_null");
+//		if(asnVo.getListAsnDetailVO() == null || asnVo.getListAsnDetailVO().isEmpty()) 
+//			throw new BizException("err_rec_asnDetail_null");
+//		//检查是否全部上架状态
+//		if(Constant.ASN_STATUS_PUTAWAY != asnVo.getAsn().getAsnStatus().intValue()){
+//			throw new BizException("err_rec_asn_trans_statusNotputaway");
+//		}
+//		//创建入库报文
+//		MSMQ msmq = new MSMQ();
+//		//报文头参数
+//		Head head = new Head();
+//		head.setMESSAGE_ID(messsageId);
+//		head.setMESSAGE_TYPE(messageType);
+//		head.setEMS_NO(emsNo);
+//		head.setFUNCTION_CODE("A");//功能代码 新增
+//		head.setMESSAGE_DATE(dateTime);
+//		head.setSENDER_ID(sendId);
+//		head.setRECEIVER_ID(receiveId);
+//		head.setSEND_TYPE("0");
+//		msmq.setHead(head);
+//		//报文体
+//		List<Map<String,String>> mapList = new ArrayList<Map<String,String>>();
+//		for(RecAsnDetailVO asnDetailVo:asnVo.getListAsnDetailVO()){
+//			MetaMerchant owner = FqDataUtils.getMerchantById(merchantService, asnDetailVo.getSku().getOwner());
+//			Map<String,String> map = new HashMap<String,String>();
+//			for(RecPutawayLocationVO putawayLocationVo:asnDetailVo.getListPtwLocVO()){
+//				map.put("MESSAGE_ID", messsageId);
+//				map.put("EMS_NO", emsNo);
+//				map.put("IO_NO",asnVo.getAsn().getAsnNo());
+//				map.put("GOODS_NATURE", asnDetailVo.getSku().getGoodsNature()==null?"":asnDetailVo.getSku().getGoodsNature()+"");
+//				map.put("IO_DATE", date);
+//				map.put("COP_G_NO", StringUtil.isBlank(asnDetailVo.getSku().getHgGoodsNo())?asnDetailVo.getSku().getSkuNo():asnDetailVo.getSku().getHgGoodsNo());
+//				map.put("G_NO", asnDetailVo.getSku().getgNo());
+//				map.put("HSCODE", asnDetailVo.getSku().getHsCode());
+//				map.put("GNAME", asnDetailVo.getSku().getSkuName());
+//				map.put("GMODEL", asnDetailVo.getSku().getSpecModel());
+//				map.put("CURR", asnDetailVo.getSku().getCurr());
+//				map.put("COUNTRY", asnDetailVo.getSku().getOriginCountry());
+//				map.put("QTY", putawayLocationVo.getPutawayLocation().getPutawayQty().toString());
+//				map.put("UNIT", asnDetailVo.getSku().getMeasureUnit());
+//				map.put("TYPE", in_stock_type);
+//				map.put("CHK_CODE", "01");
+//				map.put("GATEJOB_NO", asnVo.getAsn().getGatejobNo());
+//				map.put("WHS_CODE", asnVo.getWarehouseNo());
+//				map.put("LOCATION_CODE", putawayLocationVo.getLocationComment());
+//				map.put("OWNER_CODE", owner.getHgMerchantNo());
+//				map.put("OWNER_NAME", owner.getMerchantName());
+//			}
+//			mapList.add(map);
+//		}
+//		msmq.setBodyMaps(mapList);
+//		//创建入库报文
+//		TransmitXmlUtil tranUtil = new TransmitXmlUtil(msmq);
+//		String xmlStr = tranUtil.formXml();
+//		if(log.isInfoEnabled()) log.info("MSMQ_Message_"+messsageId+"_入库数据报文：["+xmlStr+"]");
+//		
+//		//传送入库数据到仓储企业联网监管系统
+//		boolean result = false;
+//		if(log.isInfoEnabled()) log.info("Queue名称：["+sendChnalName+"]");
+//		result = MSMQUtil.send(sendChnalName, label, xmlStr, messsageId.getBytes());
+//		if(log.isInfoEnabled()) log.info("MSMQ_Message_"+messsageId+"_入库发送接口运行结果：["+result+"]");	
+//		
+//		//保存报文
+//		MsmqMessageVo messageVo = new MsmqMessageVo();
+//		messageVo.getEntity().setMessageId(messsageId);
+//		messageVo.getEntity().setFunctionType(Constant.FUNCTION_TYPE_ASN);
+//		messageVo.getEntity().setOrderNo(asnId);
+//		messageVo.getEntity().setContent(xmlStr);
+//		messageVo.getEntity().setSender(Constant.SYSTEM_TYPE_WMS);
+//		messageVo.getEntity().setSendTime(new Date());
+//		messageVo.getEntity().setCreatePerson(loginUser.getUserId());
+//		messageVo.getEntity().setOrgId(loginUser.getOrgId());
+//		messageVo.getEntity().setWarehouseId(LoginUtil.getWareHouseId());
+//		msmqMessageService.add(messageVo);
+//		
+//		//修改asn单发送状态
+//		if(result){
+//			asnVo.getAsn().setTransStatus(Constant.SYNCSTOCK_STATUS_SEND_SUCCESS);
+//			asnVo.getAsn().setUpdatePerson(loginUser.getUserId());
+//			asnDao.updateByPrimaryKeySelective(asnVo.getAsn());
+//		}
+//	}
 	
 	public static void main(String[] args) {
 		Date today = new Date();

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1534,11 +1535,159 @@ public class PickServiceImpl extends BaseService implements IPickService {
 		}
 		
 		//TODO 发送海关辅助系统
-		try {
-			SendPickVo vo = this.view(pickVo.getSendPick().getPickId());
-			context.getStrategy4Assis().request(vo);
-		} catch(Exception e) {
-			if(logger.isErrorEnabled()) logger.error(e.getMessage(), e);
+//		try {
+//			SendPickVo vo = this.view(pickVo.getSendPick().getPickId());
+//			context.getStrategy4Assis().request(vo);
+//		} catch(Exception e) {
+//			if(logger.isErrorEnabled()) logger.error(e.getMessage(), e);
+//		}
+	}
+	
+	/**
+	 * 批量作业确认（芜湖）
+	 * @param pickVo
+	 * @param operator
+	 * @throws Exception
+	 */
+	public void batchCompletePick(SendPickVo baPickVo,String operator)throws Exception{
+		if(baPickVo == null) return;
+		if(baPickVo.getPickIdList() == null || baPickVo.getPickIdList().isEmpty()) return;
+		
+		for(String pickId:baPickVo.getPickIdList()){
+			//查询拣货单
+			SendPickVo pickVo = new SendPickVo();
+			SendPick pick = pickDao.selectByPrimaryKey(pickId);
+			//检查状态是否生效或作业中
+			if(pick.getPickStatus() != Constant.PICK_STATUS_ACTIVE &&  pick.getPickStatus() != Constant.PICK_STATUS_WORKING)
+				throw new BizException(BizStatus.PICK_STATUS_IS_NOT_ACTIVE.getReasonPhrase());
+			
+			pick.setOpPerson(operator);		
+			pickVo.setSendPick(pick);
+			//查询拣货明细
+			List<SendPickDetailVo> pickDetailVoList = pickDetailService.qryPickDetails(pickId);//qryPickDetails(pickVo.getSendPick().getPickId());
+			// 补货操作对象
+			Set<String> skuIdSet = new HashSet<String>();
+			// 对应发货单对象
+			Set<String> deliveryIdSet = new HashSet<String>();
+			//释放计划数量
+			for(SendPickDetailVo pickDetailVo:pickDetailVoList){
+				//从数据库查询拣货明细
+				SendPickDetailVo deVo = pickDetailService.getVoById(pickDetailVo.getSendPickDetail().getPickDetailId());
+				pickDetailVo.setSendPickDetail(deVo.getSendPickDetail());
+				SendPickDetail pickDetail = pickDetailVo.getSendPickDetail();
+				//查询计划拣货库位
+				SendPickLocationVo loParam = new SendPickLocationVo();
+				loParam.getSendPickLocation().setPickDetailId(pickDetailVo.getSendPickDetail().getPickDetailId());
+				loParam.getSendPickLocation().setPickType(Constant.PICK_TYPE_PLAN);
+				List<SendPickLocationVo> planLocVos = pickLocationService.qryPickLocations(loParam);
+				pickDetailVo.setPlanPickLocations(planLocVos);
+				//释放“拣货分配数量”扣减计划拣货数量
+				for (SendPickLocationVo pickLocationVo : pickDetailVo.getPlanPickLocations()) {
+					SendPickLocation plan = pickLocationVo.getSendPickLocation();
+					InvStockVO stockVo = StockOperate.getInvStockVO(pickDetailVo.getSendPickDetail().getSkuId(),
+																	plan.getBatchNo(),
+																	null, 
+																	plan.getLocationId(), 
+																	plan.getAsnDetailId(),
+																	plan.getPickQty(), 
+																	null,
+																	true,
+																	Arrays.asList(Constant.LOCATION_TYPE_PICKUP,Constant.LOCATION_TYPE_STORAGE));
+					stockService.unlockOutStock(stockVo);
+					
+					//新建实际拣货库位，与计划一致
+					SendPickLocationVo realLocationVo = new SendPickLocationVo();
+					SendPickLocation realPickLocation = new SendPickLocation();
+					BeanUtils.copyProperties(realPickLocation, plan);
+					realPickLocation.setPickLocationId(IdUtil.getUUID());
+					realPickLocation.setPickDetailId(pickDetailVo.getSendPickDetail().getPickDetailId());
+					realPickLocation.setPickType(Constant.PICK_TYPE_REAL);	
+					realPickLocation.setPackId(pickDetail.getPackId());
+					realPickLocation.setMeasureUnit(pickDetail.getMeasureUnit());
+					realPickLocation.setCreatePerson(operator);
+					realPickLocation.setUpdatePerson(operator);
+					realPickLocation.defaultValue();
+					realPickLocation.setPickLocationId2(context.getStrategy4Id().getPickLocationSeq());
+					//保存实际拣货货品库位明细
+					pickLocationDao.insertSelective(realPickLocation);	
+					realLocationVo.setSendPickLocation(realPickLocation);
+					pickDetailVo.getRealPickLocations().add(realLocationVo);
+				}
+				deliveryIdSet.add(pickDetailVo.getSendPickDetail().getDeliveryId());
+				skuIdSet.add(pickDetailVo.getSendPickDetail().getSkuId());
+				
+				//5、统计实际数量，实际重量，实际体积
+				pickDetailVo.statisAndSetRealPickQty();
+				//更新拣货明细实际拣货数量			
+				pickDetail.setUpdatePerson(operator);
+				pickDetail.setUpdateTime(new Date());
+				pickDetailDao.updateByPrimaryKeySelective(pickDetail);	
+			}
+			pickVo.setSendPickDetailVoList(pickDetailVoList);
+			//拣完货，从存放区移位到发货区库
+			//新增，如果是波次拣货单，则需要批量获取发货单进行移位
+			if (StringUtil.isNoneBlank(pick.getWaveId())) {
+//				for (String deliveryId : deliveryIdSet) {
+					stockService.shiftToSend(deliveryIdSet.iterator().next());
+//				}
+			} else {
+				stockService.shiftToSend(pick.getDeliveryId());
+			}
+			//7、更新拣货单实际拣货总数
+			pickVo.calPickQty();
+			//8、拣货单状态由“生效”或“作业中”自动变更为“作业完成”
+			pickVo.getSendPick().setPickStatus(Constant.PICK_STATUS_FINISH);
+			pickVo.getSendPick().setOpTime(new Date());
+			pickVo.getSendPick().setUpdatePerson(operator);
+			pickVo.getSendPick().setUpdateTime(new Date());
+			pickDao.updateByPrimaryKeySelective(pickVo.getSendPick());	
+			
+			//更新发货单，发货明细拣货数量		
+			deliveryService.updateAfterCompletePick(pickVo,operator);
+			if(pick.getDocType() == Constant.PICKTYPE_FORM_DELIVERY){
+				SendDeliveryVo deliveryVo = deliveryService.getDeliveryById(pickVo.getSendPick().getDeliveryId());
+				//10、登记到企业业务统计
+				parkOrgBusiStasService.newBusiStas(deliveryVo.getSendDelivery().getDocType(), 
+						deliveryVo.getSendDelivery().getDeliveryNo(), 
+						deliveryVo.getSendDelivery().getOrgId(), 
+						deliveryVo.getSendDelivery().getWarehouseId(), 
+						pickVo.getSendPick().getRealPickQty(), 
+						pickVo.getSendPick().getRealPickWeight(), 
+						pickVo.getSendPick().getRealPickVolume(), 
+						operator);
+				//新增发货操作日志
+				deliveryLogService.addNewDeliveryLog(deliveryVo.getSendDelivery().getDeliveryId(),
+						operator,Constant.DELIVERY_LOG_TYPE_PICK,deliveryVo.getSendDelivery().getOrgId(),
+						deliveryVo.getSendDelivery().getWarehouseId());
+			}
+			
+			if(pick.getDocType().intValue() == Constant.PICKTYPE_FORM_WAVE) {
+				//更新波次单拣货数量
+				waveService.updateAfterCompletePick(pickVo,operator);
+				SendWaveVo waveVo = waveService.getSendWaveVoById(pickVo.getSendPick().getWaveId());
+				parkOrgBusiStasService.newBusiStas(null, 
+						waveVo.getSendWave().getWaveNo(), 
+						waveVo.getSendWave().getOrgId(), 
+						waveVo.getSendWave().getWarehouseId(), 
+						pickVo.getSendPick().getRealPickQty(), 
+						pickVo.getSendPick().getRealPickWeight(), 
+						pickVo.getSendPick().getRealPickVolume(), 
+						operator);
+				
+			   for(SendDeliveryVo delVo:waveVo.getSendDeliberyVoList()){
+				 //新增发货操作日志
+					deliveryLogService.addNewDeliveryLog(delVo.getSendDelivery().getDeliveryId(),
+							operator,Constant.DELIVERY_LOG_TYPE_PICK,waveVo.getSendWave().getOrgId(),
+							waveVo.getSendWave().getWarehouseId());
+			   }
+			}
+			//更新任务状态
+			taskService.finishByOpId(pickVo.getSendPick().getPickId(),operator);
+
+			//检查拣货区库存是否足够,若库存不足，则生成补货移位单
+			if (!skuIdSet.isEmpty()) {
+				stockService.repPickSku(skuIdSet, pick.getPickNo());
+			}
 		}
 	}
 	

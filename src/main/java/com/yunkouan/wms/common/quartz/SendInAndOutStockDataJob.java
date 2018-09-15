@@ -62,9 +62,9 @@ public class SendInAndOutStockDataJob {
 		List<String> synIdList = whsettingList.stream().map(t->t.getWarehouseId()).collect(Collectors.toList());
 		
 		//将所有仓库的入库数据发送到海关
-		asnService.findAndSendInStockData(synIdList);
+//		asnService.findAndSendInStockData(synIdList);
 		//将所有仓库的出库数据发送到海关
-		deliveryService.findAndSendOutStockData(synIdList);
+//		deliveryService.findAndSendOutStockData(synIdList);
 		
 		if(log.isInfoEnabled()) log.info("------发送出入库数据任务结束");
 	}

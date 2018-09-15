@@ -521,12 +521,12 @@ public class PutawayServiceImpl extends BaseService implements IPutawayService {
 		}
 
 		//TODO 发送海关辅助系统
-    	try {
-	    	RecPutawayVO vo = this.view(param_recPutawayVO.getPutaway().getPutawayId());
-	    	context.getStrategy4Assis().request(vo);
-		} catch(Exception e) {
-			if(log.isErrorEnabled()) log.error(e.getMessage(), e);
-		}
+//    	try {
+//	    	RecPutawayVO vo = this.view(param_recPutawayVO.getPutaway().getPutawayId());
+//	    	context.getStrategy4Assis().request(vo);
+//		} catch(Exception e) {
+//			if(log.isErrorEnabled()) log.error(e.getMessage(), e);
+//		}
 	}
 	// 检查实际上架库位所属库区的货品类型跟货品所属货品类型是否一致  TODO
 	private void checkSkuType(String skuId, String locationId) throws Exception {

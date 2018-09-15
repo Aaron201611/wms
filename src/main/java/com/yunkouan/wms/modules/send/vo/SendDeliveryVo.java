@@ -429,193 +429,193 @@ public class SendDeliveryVo extends BaseVO {
 	public SendDeliveryVo getCondition(int n){
 		example.setOrderByClause(orderByStr);
 		Criteria c = example.getOredCriteria().get(n);
-		Criteria c2 = example.createCriteria();
-		example.or(c2);
+//		Criteria c2 = example.createCriteria();
+//		example.or(c2);
 		if(sendDelivery.getDeliveryStatus() != null){
 			c.andEqualTo("deliveryStatus", sendDelivery.getDeliveryStatus());
-			c2.andEqualTo("deliveryStatus", sendDelivery.getDeliveryStatus());
+//			c2.andEqualTo("deliveryStatus", sendDelivery.getDeliveryStatus());
 		}
 		if(sendDelivery.getInterceptStatus() != null){
 			c.andEqualTo("interceptStatus", sendDelivery.getInterceptStatus());
-			c2.andEqualTo("interceptStatus", sendDelivery.getInterceptStatus());
+//			c2.andEqualTo("interceptStatus", sendDelivery.getInterceptStatus());
 		}
 		if(StringUtils.isNotEmpty(sendDelivery.getOwner())){
 			c.andEqualTo("owner",sendDelivery.getOwner());
-			c2.andEqualTo("owner",sendDelivery.getOwner());
+//			c2.andEqualTo("owner",sendDelivery.getOwner());
 		}
 		if(StringUtils.isNotEmpty(sendDelivery.getSender())){
 			c.andEqualTo("sender",sendDelivery.getSender());
-			c2.andEqualTo("sender",sendDelivery.getSender());
+//			c2.andEqualTo("sender",sendDelivery.getSender());
 		}
 		//		if(StringUtils.isNotEmpty(sendDelivery.getReceiver())){
 		//			c.andEqualTo("receiver",sendDelivery.getReceiver());
 		//		}
 		if(StringUtils.isNotEmpty(sendDelivery.getContactPerson())){
 			c.andEqualTo("contactPerson",sendDelivery.getContactPerson());
-			c2.andEqualTo("contactPerson",sendDelivery.getContactPerson());
+//			c2.andEqualTo("contactPerson",sendDelivery.getContactPerson());
 		}
 		if(StringUtils.isNotEmpty(sendDelivery.getContactPhone())){
 			c.andEqualTo("contactPhone",sendDelivery.getContactPhone());
-			c2.andEqualTo("contactPhone",sendDelivery.getContactPhone());
+//			c2.andEqualTo("contactPhone",sendDelivery.getContactPhone());
 		}
 		if(StringUtils.isNotEmpty(sendDelivery.getProvince())){
 			c.andEqualTo("province",sendDelivery.getProvince());
-			c2.andEqualTo("province",sendDelivery.getProvince());
+//			c2.andEqualTo("province",sendDelivery.getProvince());
 		}
 		if(StringUtils.isNotEmpty(sendDelivery.getCity())){
 			c.andEqualTo("city",sendDelivery.getCity());
-			c2.andEqualTo("city",sendDelivery.getCity());
+//			c2.andEqualTo("city",sendDelivery.getCity());
 		}
 		if(StringUtils.isNotEmpty(sendDelivery.getCounty())){
 			c.andEqualTo("county",sendDelivery.getCounty());
-			c2.andEqualTo("county",sendDelivery.getCounty());
+//			c2.andEqualTo("county",sendDelivery.getCounty());
 		}
 		if(sendDelivery.getDocType() != null){
 			c.andEqualTo("docType",sendDelivery.getDocType());
-			c2.andEqualTo("docType",sendDelivery.getDocType());
+//			c2.andEqualTo("docType",sendDelivery.getDocType());
 		}
 		if(StringUtils.isNotEmpty(sendDelivery.getSrcNo())){
 			c.andEqualTo("srcNo",sendDelivery.getSrcNo());
-			c2.andEqualTo("srcNo",sendDelivery.getSrcNo());
+//			c2.andEqualTo("srcNo",sendDelivery.getSrcNo());
 		}
 		if(StringUtils.isNotEmpty(sendDelivery.getDeliveryNo())){
 			c.andEqualTo("deliveryNo",sendDelivery.getDeliveryNo());
-			c2.andEqualTo("deliveryNo",sendDelivery.getDeliveryNo());
+//			c2.andEqualTo("deliveryNo",sendDelivery.getDeliveryNo());
 		}
 		if(StringUtils.isNotEmpty(sendDelivery.getExpressServiceCode())){
 			c.andEqualTo("expressServiceCode",sendDelivery.getExpressServiceCode());
-			c2.andEqualTo("expressServiceCode",sendDelivery.getExpressServiceCode());
+//			c2.andEqualTo("expressServiceCode",sendDelivery.getExpressServiceCode());
 		}
 		if(StringUtils.isNotEmpty(sendDelivery.getExpressBillNo())){
 			c.andEqualTo("expressBillNo",sendDelivery.getExpressBillNo());
-			c2.andEqualTo("expressBillNo",sendDelivery.getExpressBillNo());
+//			c2.andEqualTo("expressBillNo",sendDelivery.getExpressBillNo());
 		}
 		if(waveIsNull == null && StringUtils.isNotEmpty(sendDelivery.getWaveId())){
 			c.andEqualTo("waveId",sendDelivery.getWaveId());
-			c2.andEqualTo("waveId",sendDelivery.getWaveId());
+//			c2.andEqualTo("waveId",sendDelivery.getWaveId());
 		}
 		if(waveIsNull != null && waveIsNull){
 			c.andCondition("wave_id is null");
-			c2.andCondition("wave_id is null");
+//			c2.andCondition("wave_id is null");
 		}
 		if(deliveryStatusList != null && !deliveryStatusList.isEmpty()){
 			c.andIn("deliveryStatus", deliveryStatusList);
-			c2.andIn("deliveryStatus", deliveryStatusList);
+//			c2.andIn("deliveryStatus", deliveryStatusList);
 		}
 		if(loadConfirmIds != null && !loadConfirmIds.isEmpty()){
 			c.andIn("deliveryId", loadConfirmIds);
-			c2.andIn("deliveryId", loadConfirmIds);
+//			c2.andIn("deliveryId", loadConfirmIds);
 		}
 		if(notInDeliveryIdList != null && !notInDeliveryIdList.isEmpty()){
 			c.andNotIn("deliveryId", notInDeliveryIdList);
-			c2.andNotIn("deliveryId", notInDeliveryIdList);
+//			c2.andNotIn("deliveryId", notInDeliveryIdList);
 		}
 		if(greaterThanStatus != null){
 			c.andGreaterThan("deliveryStatus", greaterThanStatus);
-			c2.andGreaterThan("deliveryStatus", greaterThanStatus);
+//			c2.andGreaterThan("deliveryStatus", greaterThanStatus);
 		}
 		if(lessThanStatus != null){
 			c.andLessThan("deliveryStatus", lessThanStatus);
-			c2.andLessThan("deliveryStatus", lessThanStatus);
+//			c2.andLessThan("deliveryStatus", lessThanStatus);
 		}
 		if(StringUtils.isNotEmpty(beginTime)){
 			c.andGreaterThanOrEqualTo("orderTime", beginTime+" 00:00:00");
-			c2.andGreaterThanOrEqualTo("orderTime", beginTime+" 00:00:00");
+//			c2.andGreaterThanOrEqualTo("orderTime", beginTime+" 00:00:00");
 		}
 		if (StringUtils.isNotEmpty(endTime)) {
 			c.andLessThanOrEqualTo("orderTime", endTime+" 23:59:59");
-			c2.andLessThanOrEqualTo("orderTime", endTime+" 23:59:59");
+//			c2.andLessThanOrEqualTo("orderTime", endTime+" 23:59:59");
 		}
 		if(StringUtils.isNotEmpty(sendStartTime)){
 			c.andGreaterThanOrEqualTo("shipmentTime", sendStartTime);
-			c2.andGreaterThanOrEqualTo("shipmentTime", sendStartTime);
+//			c2.andGreaterThanOrEqualTo("shipmentTime", sendStartTime);
 		}
 		if (StringUtils.isNotEmpty(sendEndTime)) {
 			c.andLessThanOrEqualTo("shipmentTime", sendEndTime);
-			c2.andLessThanOrEqualTo("shipmentTime", sendEndTime);
+//			c2.andLessThanOrEqualTo("shipmentTime", sendEndTime);
 		}
 		if(StringUtils.isNotEmpty(sendDelivery.getOrgId())){
 			c.andCondition("org_id=", sendDelivery.getOrgId());
-			c2.andCondition("org_id=", sendDelivery.getOrgId());
+//			c2.andCondition("org_id=", sendDelivery.getOrgId());
 		}
 		if(StringUtils.isNotEmpty(sendDelivery.getWarehouseId())){
 			c.andCondition("warehouse_id=", sendDelivery.getWarehouseId());
-			c2.andCondition("warehouse_id=", sendDelivery.getWarehouseId());
+//			c2.andCondition("warehouse_id=", sendDelivery.getWarehouseId());
 		}
 		if(merchantIdList != null && !merchantIdList.isEmpty()){
 			c.andIn("owner", merchantIdList);
-			c2.andIn("owner", merchantIdList);
+//			c2.andIn("owner", merchantIdList);
 		}
 		if(!StringUtil.isTrimEmpty(provinceName)){
 			c.andLike("province", '%'+provinceName+'%');
-			c2.andLike("province", '%'+provinceName+'%');
+//			c2.andLike("province", '%'+provinceName+'%');
 		}
 		if(!StringUtil.isTrimEmpty(sendDelivery.getReceiver())){
 			c.andLike("receiver", '%'+sendDelivery.getReceiver()+'%');
-			c2.andLike("receiver", '%'+sendDelivery.getReceiver()+'%');
+//			c2.andLike("receiver", '%'+sendDelivery.getReceiver()+'%');
 		}
 		if(!StringUtil.isTrimEmpty(cityName)){
 			c.andLike("city", '%'+cityName+'%');
-			c2.andLike("city", '%'+cityName+'%');
+//			c2.andLike("city", '%'+cityName+'%');
 		}
 		if(!StringUtil.isTrimEmpty(countyName)){
 			c.andLike("county", '%'+countyName+'%');
-			c2.andLike("county", '%'+countyName+'%');
+//			c2.andLike("county", '%'+countyName+'%');
 		}
 		if(!StringUtil.isTrimEmpty(srcNoLike)){
 			c.andLike("srcNo",'%'+srcNoLike+'%');
-			c2.andLike("srcNo",'%'+srcNoLike+'%');
+//			c2.andLike("srcNo",'%'+srcNoLike+'%');
 		}
 		if(!StringUtil.isTrimEmpty(deliveryNoLike)){
 			c.andLike("deliveryNo",'%'+deliveryNoLike+'%');
-			c2.andLike("deliveryNo",'%'+deliveryNoLike+'%');
+//			c2.andLike("deliveryNo",'%'+deliveryNoLike+'%');
 		}
 		if(hasAllPick != null && hasAllPick){
 			c.andCondition("order_qty > pick_qty");
-			c2.andCondition("order_qty > pick_qty");
+//			c2.andCondition("order_qty > pick_qty");
 		}
 		if(statusLessThan != null){
 			c.andLessThan("deliveryStatus", statusLessThan);
-			c2.andLessThan("deliveryStatus", statusLessThan);
+//			c2.andLessThan("deliveryStatus", statusLessThan);
 		}
 		if (greaterThanUpdateTime != null) {
 			c.andGreaterThanOrEqualTo("updateTime", greaterThanUpdateTime);
-			c2.andGreaterThanOrEqualTo("updateTime", greaterThanUpdateTime);
+//			c2.andGreaterThanOrEqualTo("updateTime", greaterThanUpdateTime);
 		}
 		if (lessThanUpdateTime != null) {
 			c.andLessThanOrEqualTo("updateTime", lessThanUpdateTime);
-			c2.andLessThanOrEqualTo("updateTime", lessThanUpdateTime);
+//			c2.andLessThanOrEqualTo("updateTime", lessThanUpdateTime);
 		}
 		if(warehouseIdList != null && !warehouseIdList.isEmpty()){
 			c.andIn("warehouseId", warehouseIdList);
-			c2.andIn("warehouseId", warehouseIdList);
+//			c2.andIn("warehouseId", warehouseIdList);
 		}
 		if(sendDelivery.getExpressBillPrintTimes() != null){
 			if(sendDelivery.getExpressBillPrintTimes() > 0){
 				c.andGreaterThanOrEqualTo("expressBillPrintTimes", sendDelivery.getExpressBillPrintTimes());
-				c2.andGreaterThanOrEqualTo("expressBillPrintTimes", sendDelivery.getExpressBillPrintTimes());
+//				c2.andGreaterThanOrEqualTo("expressBillPrintTimes", sendDelivery.getExpressBillPrintTimes());
 			}else{
 				c.andIsNull("expressBillPrintTimes");
-				c2.andIsNull("expressBillPrintTimes");
+//				c2.andIsNull("expressBillPrintTimes");
 			}
 		}
 		if(!StringUtil.isTrimEmpty(sendDelivery.getDeliveryNo1())){
 			c.andLike("deliveryNo1", "%"+sendDelivery.getDeliveryNo1()+"%");
-			c2.andLike("deliveryNo1", "%"+sendDelivery.getDeliveryNo1()+"%");
+//			c2.andLike("deliveryNo1", "%"+sendDelivery.getDeliveryNo1()+"%");
 		}
-		if(StringUtils.isNotEmpty(sendStatusDesc)){
-			List<Integer>list=new ArrayList<>();
-			list.add(Constant.SEND_JUST_ERP_SUCCESS);
-			list.add(Constant.SEND_WULIU_ERP_SUCCESS);
-			if("是".equals(sendStatusDesc)){
-
-				c.andIn("sendStatus", list);
-				c2.andIn("sendStatus", list);
-			}else if("否".equals(sendStatusDesc)){
-				c.andNotIn("sendStatus", list);
-				c2.andIsNull("sendStatus");
-			}
-		}
+//		if(StringUtils.isNotEmpty(sendStatusDesc)){
+//			List<Integer>list=new ArrayList<>();
+//			list.add(Constant.SEND_JUST_ERP_SUCCESS);
+//			list.add(Constant.SEND_WULIU_ERP_SUCCESS);
+//			if("是".equals(sendStatusDesc)){
+//
+//				c.andIn("sendStatus", list);
+//				c2.andIn("sendStatus", list);
+//			}else if("否".equals(sendStatusDesc)){
+//				c.andNotIn("sendStatus", list);
+//				c2.andIsNull("sendStatus");
+//			}
+//		}
 		return this;
 	}
 

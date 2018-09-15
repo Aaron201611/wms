@@ -864,22 +864,6 @@ public class DeliveryController extends BaseController{
 		synchronized (this) {
 			deliveryService.checkPackageWeight(sendDeliveryVo, loginUser);
 		}
-		//同步物流公司
-//		try {
-//			List<SendDeliveryVo> sdVoList = new ArrayList<SendDeliveryVo>();
-//			sdVoList.add(sendDeliveryVo);
-//			expressService.sendDeliveryToLogistics(sdVoList);
-//		} catch (Exception e) {
-//			if(log.isErrorEnabled()) log.error(e.getMessage(), e);
-//			rm.setError();
-//			rm.addMessage("发货成功，无法连接物流公司，请稍候手工操作！");
-//		}
-		//同步ERP
-//		ErpResult erpResult = erpService.sendToERP(sendDeliveryVo, 3);
-//		if(erpResult == null || erpResult.getCode() != 1){
-//			rm.setError();
-//			rm.addMessage("发货成功，无法连接ERP，请稍候手工操作！");
-//		}
 	
 		return rm;
 	}
@@ -900,26 +884,6 @@ public class DeliveryController extends BaseController{
 		String orgId = loginUser.getOrgId();
 		String warehouseId = LoginUtil.getWareHouseId();
 		ResultModel rm = new ResultModel();	
-//		synchronized (this) {
-//			SendDeliveryVo deliveryVo = deliveryService.confirmSend(deliveryId,orgId,warehouseId, userId);
-//			//同步物流公司
-//			try {
-//				List<SendDeliveryVo> sdVoList = new ArrayList<SendDeliveryVo>();
-//				sdVoList.add(deliveryVo);
-//				expressService.sendDeliveryToLogistics(sdVoList);
-//			} catch (Exception e) {
-//				if(log.isErrorEnabled()) log.error(e.getMessage(), e);
-//				rm.setError();
-//				rm.addMessage("发货成功，无法连接物流公司，请稍候手工操作！");
-//			}
-//			//同步ERP
-//			ErpResult erpResult = erpService.sendToERP(deliveryVo, 3);
-//			if(erpResult == null || erpResult.getCode() != 1){
-//				rm.setError();
-//				rm.addMessage("发货成功，无法连接ERP，请稍候手工操作！");
-//			}
-//			rm.setObj(deliveryVo);
-//		}
 
 		synchronized (this) {
 			SendDeliveryVo deliveryVo = deliveryService.confirmSend(expressBillNo,orgId,warehouseId, userId);
@@ -1071,52 +1035,52 @@ public class DeliveryController extends BaseController{
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/batchGetExpressNoAndSave", method = RequestMethod.POST)
-	@ResponseBody
-	public ResultModel batchGetExpressNoAndSave(@RequestBody SendDeliveryVo sendDeliveryVo)throws Exception {
-		//获取登录用户
-		Principal loginUser = LoginUtil.getLoginUser();
-		//批量获取运单号
-		if(sendDeliveryVo.getLoadConfirmIds() == null || sendDeliveryVo.getLoadConfirmIds().isEmpty()){
-			return new ResultModel();
-		}
-		StringBuffer message = new StringBuffer("");
-		for(String id:sendDeliveryVo.getLoadConfirmIds()){
-			SendDeliveryVo vo = deliveryService.getDeliveryById(id);
-			try {
-				if(StringUtil.isEmpty(vo.getSendDelivery().getExpressBillNo())){
-					String billNo = null;
-					//若是ems或申通，则获取运单号
-					if(Constant.EXPRESS_SERVICE_EMS.equals(sendDeliveryVo.getSendDelivery().getExpressServiceCode())||
-							Constant.EXPRESS_SERVICE_ST.equals(sendDeliveryVo.getSendDelivery().getExpressServiceCode())){
-						
-						billNo = expressService.getLogisticsNo(sendDeliveryVo.getSendDelivery().getExpressServiceCode());
-						if(StringUtil.isEmpty(billNo)){
-							message.append(vo.getSendDelivery().getDeliveryNo())
-									.append(" 获取运单号失败！")
-									.append("\n\r<br />");
-							continue;
-						}
-					}
-					//若非ems或申通，则用发货单号
-					else{
-						billNo = vo.getSendDelivery().getDeliveryNo();
-					}
-					vo.getSendDelivery().setExpressBillNo(billNo);
-				}
-				deliveryService.updateEntity(vo.getSendDelivery(), loginUser);
-			} catch (Exception e) {
-				log.error(e.getMessage());
-				message.append(vo.getSendDelivery().getDeliveryNo())
-						.append(e.getMessage())
-						.append("\n\r<br />");
-			}
-		}
-		if(!StringUtil.isEmpty(message)){
-			throw new BizException("batchGetExpressNoAndEnable_error",message.toString());
-		}
-		return new ResultModel();
-	}
+//	@RequestMapping(value = "/batchGetExpressNoAndSave", method = RequestMethod.POST)
+//	@ResponseBody
+//	public ResultModel batchGetExpressNoAndSave(@RequestBody SendDeliveryVo sendDeliveryVo)throws Exception {
+//		//获取登录用户
+//		Principal loginUser = LoginUtil.getLoginUser();
+//		//批量获取运单号
+//		if(sendDeliveryVo.getLoadConfirmIds() == null || sendDeliveryVo.getLoadConfirmIds().isEmpty()){
+//			return new ResultModel();
+//		}
+//		StringBuffer message = new StringBuffer("");
+//		for(String id:sendDeliveryVo.getLoadConfirmIds()){
+//			SendDeliveryVo vo = deliveryService.getDeliveryById(id);
+//			try {
+//				if(StringUtil.isEmpty(vo.getSendDelivery().getExpressBillNo())){
+//					String billNo = null;
+//					//若是ems或申通，则获取运单号
+//					if(Constant.EXPRESS_SERVICE_EMS.equals(sendDeliveryVo.getSendDelivery().getExpressServiceCode())||
+//							Constant.EXPRESS_SERVICE_ST.equals(sendDeliveryVo.getSendDelivery().getExpressServiceCode())){
+//						
+//						billNo = expressService.getLogisticsNo(sendDeliveryVo.getSendDelivery().getExpressServiceCode());
+//						if(StringUtil.isEmpty(billNo)){
+//							message.append(vo.getSendDelivery().getDeliveryNo())
+//									.append(" 获取运单号失败！")
+//									.append("\n\r<br />");
+//							continue;
+//						}
+//					}
+//					//若非ems或申通，则用发货单号
+//					else{
+//						billNo = vo.getSendDelivery().getDeliveryNo();
+//					}
+//					vo.getSendDelivery().setExpressBillNo(billNo);
+//				}
+//				deliveryService.updateEntity(vo.getSendDelivery(), loginUser);
+//			} catch (Exception e) {
+//				log.error(e.getMessage());
+//				message.append(vo.getSendDelivery().getDeliveryNo())
+//						.append(e.getMessage())
+//						.append("\n\r<br />");
+//			}
+//		}
+//		if(!StringUtil.isEmpty(message)){
+//			throw new BizException("batchGetExpressNoAndEnable_error",message.toString());
+//		}
+//		return new ResultModel();
+//	}
 	
 	
 
@@ -1126,15 +1090,15 @@ public class DeliveryController extends BaseController{
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/batchSyncOutStockData", method = RequestMethod.POST)
-	@ResponseBody
-	public ResultModel batchSyncOutStockData(@RequestBody SendDeliveryVo sendDeliveryVo)throws Exception {
-		if(sendDeliveryVo == null) 
-			throw new BizException("data_is_null");		
-		this.deliveryService.bachSyncOutStockData(sendDeliveryVo.getOperIdList());
-		ResultModel rm = new ResultModel();
-		return rm;
-	}
+//	@RequestMapping(value = "/batchSyncOutStockData", method = RequestMethod.POST)
+//	@ResponseBody
+//	public ResultModel batchSyncOutStockData(@RequestBody SendDeliveryVo sendDeliveryVo)throws Exception {
+//		if(sendDeliveryVo == null) 
+//			throw new BizException("data_is_null");		
+//		this.deliveryService.bachSyncOutStockData(sendDeliveryVo.getOperIdList());
+//		ResultModel rm = new ResultModel();
+//		return rm;
+//	}
 	
     /**
      * 推送出库数据(单条推送)

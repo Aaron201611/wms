@@ -11,7 +11,7 @@ import com.yunkouan.util.SpringContextHolder;
 import com.yunkouan.wms.common.strategy.StrategyContext;
 import com.yunkouan.wms.modules.assistance.service.IAssisService;
 
-@DisallowConcurrentExecution
+//@DisallowConcurrentExecution
 public class AssisJob extends QuartzJobBean {
 	private static Log log = LogFactory.getLog(AssisJob.class);
 
@@ -20,8 +20,8 @@ public class AssisJob extends QuartzJobBean {
 		try {
 			// 不得自动注入，否则要求IAssisService必须实现序列化
 			StrategyContext assisService = SpringContextHolder.getBean(StrategyContext.class);
-			IAssisService service = assisService.getStrategy4Assis();
-			service.response();
+//			IAssisService service = assisService.getStrategy4Assis();
+//			service.response();
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) log.error(e.getMessage(), e);
 		}

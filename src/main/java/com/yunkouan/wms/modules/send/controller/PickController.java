@@ -493,6 +493,27 @@ public class PickController extends BaseController{
 	}
 	
 	/**
+	 * 批量拣货确认
+	 * @param sendPickVo
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/batchConfirm", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultModel batchConfirm(@RequestBody  SendPickVo sendPickVo)throws Exception {
+		if(sendPickVo == null || sendPickVo.getSendPick()== null) 
+			throw new BizException("Pick is null");
+		//获取登录用户
+		Principal loginUser = LoginUtil.getLoginUser();
+		String operator = loginUser.getUserId();
+		synchronized (this) {
+			pickService.batchCompletePick(sendPickVo, operator);
+		}
+		ResultModel rm = new ResultModel();	
+		return rm;
+	}
+	
+	/**
 	 * 查询拣货明细
 	 * @param sendPickVo
 	 * @throws Exception

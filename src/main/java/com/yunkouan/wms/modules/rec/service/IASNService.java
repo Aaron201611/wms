@@ -106,7 +106,7 @@ public interface IASNService {
 	 * @param _recAsnVo
 	 * @throws Exception
 	 */
-	public ErpResult updateERPInventory(RecAsnVO _recAsnVo) throws Exception;
+//	public ErpResult updateERPInventory(RecAsnVO _recAsnVo) throws Exception;
 	
 	/**
 	 * 收货确认和自动生成上架单 TODO
@@ -229,19 +229,19 @@ public interface IASNService {
 	 * @param warehouseIdList
 	 * @throws Exception
 	 */
-	public void findAndSendInStockData(List<String> warehouseIdList)throws Exception;
+//	public void findAndSendInStockData(List<String> warehouseIdList)throws Exception;
 	
 	/**
 	 * 批量同步入库数据
 	 * @param idList
 	 * @throws Exception
 	 */
-	public void batchSyncInstockData(List<String> idList) throws Exception;
+//	public void batchSyncInstockData(List<String> idList) throws Exception;
 	
 	/**
 	 * 传送入库数据对接仓储企业联网监管系统
 	 * @throws Exception
 	 */
-	public void transmitInstockXML(String asnId) throws Exception;
+//	public void transmitInstockXML(String asnId) throws Exception;
 	
 }
